@@ -18,7 +18,7 @@ if(APPLE)
 endif()
 
 # bridge target
-add_executable(bridge src/main.c)
+add_executable(bridge src/main.c src/gl_init.c src/read_mesh.c)
 target_link_libraries(bridge PRIVATE glad glfw)
 target_include_directories(bridge PRIVATE glad/include)
 target_include_directories(bridge PRIVATE glfw/include)
