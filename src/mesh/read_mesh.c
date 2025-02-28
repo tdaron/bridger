@@ -3,9 +3,9 @@
 #include <string.h>
 #include <float.h>
 
-#include "read_mesh.h"
+#include "mesh.h"
 
-Mesh* readMeshForOpenGL(const char* filename) {
+Mesh* readMesh(const char* filename) {
     FILE* file = fopen(filename, "r");
     if (!file) {
         fprintf(stderr, "Error opening file: %s\n", filename);

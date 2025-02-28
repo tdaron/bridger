@@ -20,5 +20,5 @@ typedef struct {
     int vertexArraySize; // Size in number of floats
 } Mesh;
 
-Mesh* readMeshForOpenGL(const char* filename);
+Mesh* readMesh(const char* filename);
 void freeMesh(Mesh* mesh);
