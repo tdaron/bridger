@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
-
+#include <log.h>
 #include "mesh.h"
 
 Mesh* readMesh(const char* filename) {
@@ -26,7 +26,7 @@ Mesh* readMesh(const char* filename) {
     
     // Read number of nodes
     if (fgets(line, sizeof(line), file) == NULL) {
-        fprintf(stderr, "Error reading number of nodes\n");
+        log_error("Error reading number of nodes\n");
         free(mesh);
         fclose(file);
         return NULL;
@@ -34,7 +34,7 @@ Mesh* readMesh(const char* filename) {
     
     int numNodes;
     if (sscanf(line, "Number of nodes %d", &numNodes) != 1) {
-        fprintf(stderr, "Invalid format for number of nodes\n");
+        log_error("Invalid format for number of nodes\n");
         free(mesh);
         fclose(file);
         return NULL;
@@ -45,7 +45,7 @@ Mesh* readMesh(const char* filename) {
     mesh->numVertices = numNodes;
     mesh->vertices = (Vertex*)malloc(numNodes * sizeof(Vertex));
     if (!mesh->vertices) {
-        fprintf(stderr, "Memory allocation error for vertices\n");
+        log_error("Memory allocation error for vertices\n");
         free(mesh);
         fclose(file);
         return NULL;
@@ -54,7 +54,7 @@ Mesh* readMesh(const char* filename) {
     // Read node coordinates
     for (int i = 0; i < numNodes; i++) {
         if (fgets(line, sizeof(line), file) == NULL) {
-            fprintf(stderr, "Error reading node %d\n", i);
+            log_error("Error reading node %d\n", i);
             free(mesh->vertices);
             free(mesh);
             fclose(file);
@@ -64,7 +64,7 @@ Mesh* readMesh(const char* filename) {
         int nodeIdx;
         float x, y;
         if (sscanf(line, "%d : %e %e", &nodeIdx, &x, &y) != 3) {
-            fprintf(stderr, "Invalid format for node %d\n", i);
+            log_error("Invalid format for node %d\n", i);
             free(mesh->vertices);
             free(mesh);
             fclose(file);
@@ -87,19 +87,19 @@ Mesh* readMesh(const char* filename) {
     // Read number of triangles
     int numTriangles;
     if (sscanf(line, "Number of triangles %d", &numTriangles) != 1) {
-        fprintf(stderr, "Invalid format for number of triangles\n");
+        log_error("Invalid format for number of triangles\n");
         free(mesh->vertices);
         free(mesh);
         fclose(file);
         return NULL;
     }
     
-    printf("Reading %d triangles...\n", numTriangles);
+    log_info("Reading %d triangles...\n", numTriangles);
     
     mesh->numTriangles = numTriangles;
     mesh->triangles = (Triangle*)malloc(numTriangles * sizeof(Triangle));
     if (!mesh->triangles) {
-        fprintf(stderr, "Memory allocation error for triangles\n");
+        log_error("Memory allocation error for triangles\n");
         free(mesh->vertices);
         free(mesh);
         fclose(file);
@@ -123,13 +123,13 @@ Mesh* readMesh(const char* filename) {
     }
     
     if (triCount != numTriangles) {
-        fprintf(stderr, "Warning: Read only %d triangles out of %d\n", triCount, numTriangles);
+        log_error("Warning: Read only %d triangles out of %d\n", triCount, numTriangles);
         mesh->numTriangles = triCount;
     }
     
     fclose(file);
     
-    printf("Normalizing mesh coordinates...\n");
+    log_info("Normalizing mesh coordinates...\n");
     
     // Find mesh bounding box
     float minX = FLT_MAX, maxX = -FLT_MAX;
@@ -149,14 +149,14 @@ Mesh* readMesh(const char* filename) {
     float centerX = (minX + maxX) / 2.0f;
     float centerY = (minY + maxY) / 2.0f;
     
-    printf("Mesh bounds: X[%.2f, %.2f], Y[%.2f, %.2f]\n", minX, maxX, minY, maxY);
-    printf("Center: (%.2f, %.2f), Scale: %.5f\n", centerX, centerY, scale);
+    log_info("Mesh bounds: X[%.2f, %.2f], Y[%.2f, %.2f]\n", minX, maxX, minY, maxY);
+    log_info("Center: (%.2f, %.2f), Scale: %.5f\n", centerX, centerY, scale);
     
     // Create vertex array for OpenGL (3 vertices per triangle, 3 coordinates per vertex)
     mesh->vertexArraySize = mesh->numTriangles * 3 * 3;
     mesh->vertexArray = (float*)malloc(mesh->vertexArraySize * sizeof(float));
     if (!mesh->vertexArray) {
-        fprintf(stderr, "Memory allocation error for vertex array\n");
+        log_error("Memory allocation error for vertex array\n");
         free(mesh->triangles);
         free(mesh->vertices);
         free(mesh);
@@ -184,15 +184,15 @@ Mesh* readMesh(const char* filename) {
     }
     
     // Print debug info for first triangle
-    printf("First triangle vertices after normalization:\n");
-    printf("V1: (%.2f, %.2f, %.2f)\n", 
+    log_info("First triangle vertices after normalization:\n");
+    log_info("V1: (%.2f, %.2f, %.2f)\n", 
            mesh->vertexArray[0], mesh->vertexArray[1], mesh->vertexArray[2]);
-    printf("V2: (%.2f, %.2f, %.2f)\n", 
+    log_info("V2: (%.2f, %.2f, %.2f)\n", 
            mesh->vertexArray[3], mesh->vertexArray[4], mesh->vertexArray[5]);
-    printf("V3: (%.2f, %.2f, %.2f)\n", 
+    log_info("V3: (%.2f, %.2f, %.2f)\n", 
            mesh->vertexArray[6], mesh->vertexArray[7], mesh->vertexArray[8]);
     
-    printf("Mesh loaded successfully: %d vertices, %d triangles\n", 
+    log_info("Mesh loaded successfully: %d vertices, %d triangles\n", 
            mesh->numVertices, mesh->numTriangles);
     
     return mesh;
