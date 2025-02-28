@@ -2,10 +2,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 // clang-format on
-#include "gl_init.h"
-#include "read_mesh.h"
+#include "gui/gui.h"
+#include "mesh/read_mesh.h"
 #include <stdbool.h>
-#include <stdio.h>
+
 void processInput(GLFWwindow *window);
 
 int main() {
@@ -70,6 +70,7 @@ int main() {
     glfwPollEvents();
   }
   glfwTerminate();
+  freeMesh(mesh);
   return 0;
 }
 

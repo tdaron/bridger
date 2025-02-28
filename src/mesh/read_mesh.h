@@ -21,3 +21,4 @@ typedef struct {
 } Mesh;
 
 Mesh* readMeshForOpenGL(const char* filename);
+void freeMesh(Mesh* mesh);

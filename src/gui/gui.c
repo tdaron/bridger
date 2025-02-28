@@ -124,3 +124,4 @@ GLuint compile_shader(const char *filename, GLenum shader_type) {
 
   return shader; // Return the compiled shader
 }
+

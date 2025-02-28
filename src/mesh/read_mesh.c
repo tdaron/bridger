@@ -4,12 +4,7 @@
 #include <float.h>
 
 #include "read_mesh.h"
-/**
- * Reads a mesh file and prepares normalized vertex data for OpenGL
- * 
- * @param filename Path to the mesh file
- * @return Mesh structure containing vertex data or NULL if error
- */
+
 Mesh* readMeshForOpenGL(const char* filename) {
     FILE* file = fopen(filename, "r");
     if (!file) {
