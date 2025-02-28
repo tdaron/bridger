@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(Bridger)
 
+set(LOGGING ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Adding GLFW
@@ -21,3 +22,6 @@ target_compile_definitions(log PRIVATE LOG_USE_COLOR)
 file(GLOB_RECURSE SRC_FILES src/*.c)
 add_executable(bridge ${SRC_FILES})
 target_link_libraries(bridge PRIVATE glad glfw log)
+if (LOGGING)
+  target_compile_definitions(bridge PRIVATE SHOULD_LOG)
+endif()
