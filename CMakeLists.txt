@@ -3,14 +3,15 @@ project(Bridger)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# glad target
+# Adding GLFW
+add_subdirectory(glfw)  
+
+# Adding GLAD
 add_library(glad STATIC glad/src/glad.c)
 target_include_directories(glad PUBLIC glad/include)
 
-# Add GLFW as a dependency
-add_subdirectory(glfw)  # Replace with the correct path to GLFW source
 
-# bridge target
+# PARCE QUE C'EST NOTRE PROJEEET
 file(GLOB_RECURSE SRC_FILES src/*.c)
 add_executable(bridge ${SRC_FILES})
 target_link_libraries(bridge PRIVATE glad glfw)
