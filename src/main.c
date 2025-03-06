@@ -1,10 +1,15 @@
 #include "gui/gui.h"
 #include "mesh/mesh.h"
 #include <stdbool.h>
+#include <gmshc.h>
+#include <stdio.h>
 
 void processInput(GLFWwindow *window);
 
 int main() {
+  int ierr;
+  gmshInitialize(0, NULL, 1, 0, &ierr);
+  printf("GMSH loaded\n");
   GLFWwindow *window = createWindow(800, 600, "Bridger");
 
   Mesh *mesh = readMesh("data/mesh.txt");
