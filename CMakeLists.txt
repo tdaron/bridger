@@ -65,11 +65,14 @@ add_library(log STATIC log/src/log.c)
 target_include_directories(log PUBLIC log/src/)
 target_compile_definitions(log PRIVATE LOG_USE_COLOR)
 
+# Adding solver
+add_subdirectory(solver)
+
 
 # PARCE QUE C'EST NOTRE PROJEEET
 file(GLOB_RECURSE SRC_FILES src/*.c)
 add_executable(bridge ${SRC_FILES})
-target_link_libraries(bridge PRIVATE glad glfw log)
+target_link_libraries(bridge PRIVATE glad glfw log solver)
 if (LOGGING)
   target_compile_definitions(bridge PRIVATE SHOULD_LOG)
 endif()
@@ -80,3 +83,4 @@ else()
   target_link_libraries(bridge PRIVATE ${GMSH_LIB_DIR}/libgmsh${CMAKE_SHARED_LIBRARY_SUFFIX})
 endif()
 target_include_directories(bridge PRIVATE ${GMSH_INCLUDE_DIR})
+target_include_directories(bridge PRIVATE solver/include)
