@@ -45,8 +45,8 @@ int main() {
                                            "src/gui/shaders/fragment.frag");
 
   vao = create_vao();
-  meshVBO = load_mesh_into_vao(vao, mesh);
-  fieldVBO = load_field_into_vao(vao, field, mesh->numTriangles * 3 * 3);
+  meshVBO = load_mesh_into_vao(vao, mesh, 0);
+  fieldVBO = load_field_into_vao(vao, field, mesh->numTriangles * 3 * 3, 0);
 
   glfwSetMouseButtonCallback(window, mouse_callback);
 
@@ -102,9 +102,7 @@ void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
     printf("Adding hole at %f %f\n", dn(xpos, mesh, 0), dn(ypos, mesh, 1));
     free(field);
     field = compute_field(mesh, &settings);
-    glDeleteBuffers(1, &meshVBO);
-    glDeleteBuffers(1, &fieldVBO);
-    meshVBO = load_mesh_into_vao(vao, mesh);
-    fieldVBO = load_field_into_vao(vao, field, mesh->numTriangles * 3 * 3);
+    meshVBO = load_mesh_into_vao(vao, mesh, meshVBO);
+    fieldVBO = load_field_into_vao(vao, field, mesh->numTriangles * 3 * 3, fieldVBO);
   }
 }
