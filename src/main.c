@@ -95,8 +95,8 @@ void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
     double xpos;
     double ypos;
     get_cursor_position(window, &settings, &xpos, &ypos);
-    settings.holeX = 5;
-    settings.holeY = 0;
+    settings.holeX = dn(xpos, mesh, 0);
+    settings.holeY = dn(ypos, mesh, 1);
     freeMesh(mesh);
     mesh = generate_mesh(&settings, &scale);
     printf("Adding hole at %f %f\n", dn(xpos, mesh, 0), dn(ypos, mesh, 1));
