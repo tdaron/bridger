@@ -2,7 +2,7 @@
 #include "mesh.h"
 #include <log.h>
 #include <stdlib.h>
-Mesh *load_mesh();
+Mesh *load_mesh(double* scale);
 
 void femErrorGmsh(int ierr, int line, char *file) {
   if (ierr == 0)
@@ -82,7 +82,7 @@ double meshSize(int dim, int tag, double x, double y, double z, double lc,
   return getSize(x, y, global_s);
 }
 
-Mesh *generate_mesh(MeshSettings *s) {
+Mesh *generate_mesh(MeshSettings *s, double* scale) {
   // cursed. who cares.
   global_s = s;
   int ierr;
@@ -124,10 +124,10 @@ Mesh *generate_mesh(MeshSettings *s) {
   gmshModelMeshGenerate(2, &ierr);
   ErrorGmsh(ierr);
 
-  return load_mesh();
+  return load_mesh(scale);
 }
 
-Mesh *load_mesh() {
+Mesh *load_mesh(double* scale) {
   int ierr;
 
   // Getting vertices
@@ -168,6 +168,6 @@ Mesh *load_mesh() {
   gmshFree(node);
   gmshFree(elem);
 
-  normalize_mesh(mesh);
+  *scale = normalize_mesh(mesh);
   return mesh;
 }

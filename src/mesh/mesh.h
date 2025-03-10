@@ -39,8 +39,8 @@ typedef struct {
     double holeY;
 } MeshSettings;
 
-Mesh* generate_mesh(MeshSettings* s);
-void normalize_mesh(Mesh* mesh);
+Mesh* generate_mesh(MeshSettings* s, double* scale);
+double normalize_mesh(Mesh* mesh);
 double getSize(double x, double y, MeshSettings* s);
 double dn(double coord, Mesh* mesh, int k);
 float* compute_field(Mesh* mesh, MeshSettings* s);

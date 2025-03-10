@@ -26,13 +26,17 @@ MeshSettings settings = {
 Mesh *mesh;
 unsigned int vao;
 float *field;
+double scale = 0;
+unsigned int meshVBO;
+unsigned int fieldVBO;
+
 int main() {
   int ierr;
   ss_init();
   gmshInitialize(0, NULL, 1, 0, &ierr);
   printf("GMSH loaded\n");
 
-  mesh = generate_mesh(&settings);
+  mesh = generate_mesh(&settings, &scale);
   field = compute_field(mesh, &settings);
   // Mesh *mesh = readMesh("data/mesh.txt");
 
@@ -41,9 +45,8 @@ int main() {
                                            "src/gui/shaders/fragment.frag");
 
   vao = create_vao();
-  unsigned int meshVBO = load_mesh_into_vao(vao, mesh);
-  unsigned int fieldVBO =
-      load_field_into_vao(vao, field, mesh->numTriangles * 3 * 3);
+  meshVBO = load_mesh_into_vao(vao, mesh);
+  fieldVBO = load_field_into_vao(vao, field, mesh->numTriangles * 3 * 3);
 
   glfwSetMouseButtonCallback(window, mouse_callback);
 
@@ -94,11 +97,14 @@ void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
     get_cursor_position(window, &settings, &xpos, &ypos);
     settings.holeX = dn(xpos, mesh, 0);
     settings.holeY = dn(ypos, mesh, 1);
-    mesh = generate_mesh(&settings);
+    freeMesh(mesh);
+    mesh = generate_mesh(&settings, &scale);
     printf("Adding hole at %f %f\n", dn(xpos, mesh, 0), dn(ypos, mesh, 1));
+    free(field);
     field = compute_field(mesh, &settings);
-    unsigned int meshVBO = load_mesh_into_vao(vao, mesh);
-    unsigned int fieldVBO =
-        load_field_into_vao(vao, field, mesh->numTriangles * 3 * 3);
+    glDeleteBuffers(1, &meshVBO);
+    glDeleteBuffers(1, &fieldVBO);
+    meshVBO = load_mesh_into_vao(vao, mesh);
+    fieldVBO = load_field_into_vao(vao, field, mesh->numTriangles * 3 * 3);
   }
 }

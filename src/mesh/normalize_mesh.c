@@ -1,7 +1,8 @@
 #include "mesh.h"
 #include <log.h>
 
-void normalize_mesh(Mesh *mesh) {
+/// @returns the value of scale
+double normalize_mesh(Mesh *mesh) {
   log_info("Normalizing mesh coordinates: num triangles: %d", mesh->numTriangles);
   float max[3] = {0, 0, 0};
   float min[3] = {0, 0, 0};
@@ -49,6 +50,7 @@ void normalize_mesh(Mesh *mesh) {
       }
     }
   }
+  return scale;
 }
 
 double dn(double coord, Mesh* mesh, int k) {
