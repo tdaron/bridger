@@ -104,5 +104,6 @@ void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
     field = compute_field(mesh, &settings);
     meshVBO = load_mesh_into_vao(vao, mesh, meshVBO);
     fieldVBO = load_field_into_vao(vao, field, mesh->numTriangles * 3 * 3, fieldVBO);
+    glfwPostEmptyEvent();
   }
 }
