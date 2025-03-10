@@ -62,10 +62,8 @@ int main() {
 
     glfwSwapBuffers(window);
     glfwPollEvents();
-    double xpos;
-    double ypos;
-    glfwGetCursorPos(window, &xpos, &ypos);
-    printf("%f %f\n", xpos, ypos );
+    // glfwGetCursorPos(window, &xpos, &ypos);
+    // printf("%f %f\n", xpos, ypos );
   }
   glfwTerminate();
   freeMesh(mesh);
@@ -82,15 +80,12 @@ void get_cursor_position(GLFWwindow *window, MeshSettings *s, double *xpos,
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
 
-  double dw = (double)width;
-  double dh = (double)height;
 
   glfwGetCursorPos(window, xpos, ypos);
 
   // Normalize to range [-1, 1]
-  *xpos = 2.0 * (*xpos / dw) - 1.0;
-  *ypos = 2.0 * (*ypos / dh) - 1.0;
-  *ypos *= -1;
+  *xpos = 2.0 * (*xpos / width) - 1.0;
+  *ypos = 1.0 - 2.0 * (*ypos /height);
 }
 
 void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
