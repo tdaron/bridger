@@ -34,6 +34,11 @@ void normalize_mesh(Mesh *mesh) {
   log_info("Center: (%.2f, %.2f, %.2f), Scale: %.5f", centers[0], centers[1],
            centers[2], scale);
 
+  mesh->centers[0] = centers[0];
+  mesh->centers[1] = centers[1];
+  mesh->centers[2] = centers[2];
+
+  mesh->scale = scale;
   for (int i = 0; i < mesh->numTriangles; i++) {
     // For each triangle
     for (int j = 0; j < 3; j++) {
@@ -44,4 +49,8 @@ void normalize_mesh(Mesh *mesh) {
       }
     }
   }
+}
+
+double dn(double coord, Mesh* mesh, int k) {
+  return (coord / mesh->scale) + mesh->centers[k];
 }

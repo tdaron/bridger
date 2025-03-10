@@ -1,6 +1,7 @@
 #include "gmshc.h"
 #include "mesh.h"
 #include <log.h>
+#include <stdlib.h>
 Mesh *load_mesh();
 
 void femErrorGmsh(int ierr, int line, char *file) {
@@ -25,58 +26,60 @@ double get_pillar_x(int i, MeshSettings *s) {
          s->offset / 2;
 }
 
-// cursed. who cares. (might wanna use the data attr from meshSize instead.)
-MeshSettings *global_s;
-double meshSize(int dim, int tag, double x, double y, double z, double lc,
-                void *data) {
-
-  double size = global_s->baseElementSize;
+double getSize(double x, double y, MeshSettings *s) {
+  double size = s->baseElementSize;
 
   double corners[4][2] = {{0, 0},
-                          {0, global_s->pillarsHeight},
-                          {global_s->pillarsWidth, 0},
-                          {global_s->pillarsWidth, global_s->pillarsHeight}};
+                          {0, s->pillarsHeight},
+                          {s->pillarsWidth, 0},
+                          {s->pillarsWidth, s->pillarsHeight}};
 
-  for (int i = 0; i < global_s->pillarsNumber; i++) {
-    double px = get_pillar_x(i, global_s);
+  for (int i = 0; i < s->pillarsNumber; i++) {
+    double px = get_pillar_x(i, s);
     for (int j = 0; j < 4; j++) {
       // for each corner
       double cx = px + corners[j][0];
-      double cy = -global_s->pillarsHeight + corners[j][1];
+      double cy = -s->pillarsHeight + corners[j][1];
 
       double dx = x - cx;
       double dy = y - cy;
 
       double dist = dx * dx + dy * dy;
-      if (dist < global_s->precisionRadius) {
-        double new_size =
-            dist * (global_s->baseElementSize - global_s->preciseElementSize) /
-                global_s->precisionRadius +
-            global_s->preciseElementSize;
+      if (dist < s->precisionRadius) {
+        double new_size = dist * (s->baseElementSize - s->preciseElementSize) /
+                              s->precisionRadius +
+                          s->preciseElementSize;
         if (new_size < size)
           size = new_size;
       }
     }
   }
 
-  if (x < global_s->precisionRadius) {
+  if (x < s->precisionRadius) {
     double new_size =
-        x * (global_s->baseElementSize - global_s->preciseElementSize) /
-            global_s->precisionRadius +
-        global_s->preciseElementSize;
+        x * (s->baseElementSize - s->preciseElementSize) / s->precisionRadius +
+        s->preciseElementSize;
     if (new_size < size)
       size = new_size;
   }
-  if (x > global_s->bridgeWidth - global_s->precisionRadius) {
-    double new_size =
-        (global_s->bridgeWidth - x) * (global_s->baseElementSize - global_s->preciseElementSize) /
-            global_s->precisionRadius +
-        global_s->preciseElementSize;
+  if (x > s->bridgeWidth - s->precisionRadius) {
+    double new_size = (s->bridgeWidth - x) *
+                          (s->baseElementSize - s->preciseElementSize) /
+                          s->precisionRadius +
+                      s->preciseElementSize;
     if (new_size < size)
       size = new_size;
   }
 
   return size;
+}
+
+// cursed. who cares. (might wanna use the data attr from meshSize instead.)
+MeshSettings *global_s;
+double meshSize(int dim, int tag, double x, double y, double z, double lc,
+                void *data) {
+
+  return getSize(x, y, global_s);
 }
 
 Mesh *generate_mesh(MeshSettings *s) {
@@ -103,6 +106,14 @@ Mesh *generate_mesh(MeshSettings *s) {
     int pillar[] = {2, idPillar};
     gmshModelOccFuse(bridge, 2, pillar, 2, NULL, NULL, NULL, NULL, NULL, -1, 1,
                      1, &ierr);
+  }
+
+  if (s->holeX != 0) {
+    int idHole = gmshModelOccAddDisk(s->holeX, s->holeY, 0, 0.6, 0.6, -1, NULL, 0,
+                                     NULL, 0, &ierr);
+    int hole[] = {2, idHole};
+    gmshModelOccCut(bridge, 2, hole, 2, NULL, NULL, NULL, NULL, NULL, -1, 1, 1,
+                    &ierr);
   }
 
   // Synchronizing CAD representation with gmsh internal models

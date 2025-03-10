@@ -1,6 +1,5 @@
 #pragma  once
 #include <gmshc.h>
-#include <stdlib.h>
 typedef struct {
     float x;
     float y;
@@ -18,6 +17,8 @@ typedef struct {
     int numTriangles;
     float* vertexArray;  // Flattened array for OpenGL
     int vertexArraySize; // Size in number of floats
+    float centers[3];
+    float scale;
 } Mesh;
 
 Mesh* readMesh(const char* filename);
@@ -34,7 +35,12 @@ typedef struct {
     double baseElementSize;
     double preciseElementSize;
     double precisionRadius;
+    double holeX;
+    double holeY;
 } MeshSettings;
 
 Mesh* generate_mesh(MeshSettings* s);
 void normalize_mesh(Mesh* mesh);
+double getSize(double x, double y, MeshSettings* s);
+double dn(double coord, Mesh* mesh, int k);
+float* compute_field(Mesh* mesh, MeshSettings* s);
