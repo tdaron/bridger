@@ -62,6 +62,10 @@ int main() {
 
     glfwSwapBuffers(window);
     glfwPollEvents();
+    double xpos;
+    double ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    printf("%f %f\n", xpos, ypos );
   }
   glfwTerminate();
   freeMesh(mesh);
