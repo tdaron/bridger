@@ -16,7 +16,7 @@ int main() {
 
   Mesh *mesh = readMesh("data/mesh.txt");
 
-  unsigned int shaderProgram = get_program("shaders/vertex.vert", "shaders/fragment.frag");
+  unsigned int shaderProgram = get_program("src/gui/shaders/vertex.vert", "src/gui/shaders/fragment.frag");
 
 
   unsigned int vao = create_vao();
