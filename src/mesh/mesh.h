@@ -1,4 +1,6 @@
 #pragma  once
+#include <gmshc.h>
+#include <stdlib.h>
 typedef struct {
     float x;
     float y;
@@ -12,9 +14,7 @@ typedef struct {
 } Triangle;
 
 typedef struct {
-    Vertex* vertices;
     int numVertices;
-    Triangle* triangles;
     int numTriangles;
     float* vertexArray;  // Flattened array for OpenGL
     int vertexArraySize; // Size in number of floats
@@ -22,3 +22,19 @@ typedef struct {
 
 Mesh* readMesh(const char* filename);
 void freeMesh(Mesh* mesh);
+
+
+typedef struct {
+    int pillarsNumber;
+    double pillarsWidth;
+    double pillarsHeight;
+    double bridgeWidth;
+    double bridgeHeight;
+    double offset;
+    double baseElementSize;
+    double preciseElementSize;
+    double precisionRadius;
+} MeshSettings;
+
+Mesh* generate_mesh(MeshSettings* s);
+void normalize_mesh(Mesh* mesh);

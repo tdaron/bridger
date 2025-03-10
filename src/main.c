@@ -12,10 +12,24 @@ int main() {
   ss_init();
   gmshInitialize(0, NULL, 1, 0, &ierr);
   printf("GMSH loaded\n");
+
+
+  MeshSettings settings = {
+    .bridgeHeight = .8,
+    .bridgeWidth = 20,
+    .pillarsWidth = 1.5,
+    .pillarsHeight = 3.5,
+    .pillarsNumber = 4,
+    .offset=3,
+    .baseElementSize = 0.5,
+    .preciseElementSize = 0.1,
+    .precisionRadius = 2
+  };
+  Mesh* mesh = generate_mesh(&settings);
+
+  // Mesh *mesh = readMesh("data/mesh.txt");
+
   GLFWwindow *window = createWindow(800, 600, "Bridger");
-
-  Mesh *mesh = readMesh("data/mesh.txt");
-
   unsigned int shaderProgram = get_program("src/gui/shaders/vertex.vert", "src/gui/shaders/fragment.frag");
 
 

@@ -19,8 +19,9 @@ Mesh* readMesh(const char* filename) {
         return NULL;
     }
     
-    mesh->vertices = NULL;
-    mesh->triangles = NULL;
+    Vertex* vertices = NULL;
+    Triangle* triangles = NULL;
+    triangles = NULL;
     mesh->vertexArray = NULL;
     
     char line[256];
@@ -44,8 +45,8 @@ Mesh* readMesh(const char* filename) {
     log_info("Reading %d nodes...", numNodes);
     
     mesh->numVertices = numNodes;
-    mesh->vertices = (Vertex*)malloc(numNodes * sizeof(Vertex));
-    if (!mesh->vertices) {
+    vertices = (Vertex*)malloc(numNodes * sizeof(Vertex));
+    if (!vertices) {
         log_error("Memory allocation error for vertices");
         free(mesh);
         fclose(file);
@@ -56,7 +57,7 @@ Mesh* readMesh(const char* filename) {
     for (int i = 0; i < numNodes; i++) {
         if (fgets(line, sizeof(line), file) == NULL) {
             log_error("Error reading node %d", i);
-            free(mesh->vertices);
+            free(vertices);
             free(mesh);
             fclose(file);
             return NULL;
@@ -66,16 +67,16 @@ Mesh* readMesh(const char* filename) {
         float x, y;
         if (sscanf(line, "%d : %e %e", &nodeIdx, &x, &y) != 3) {
             log_error("Invalid format for node %d", i);
-            free(mesh->vertices);
+            free(vertices);
             free(mesh);
             fclose(file);
             return NULL;
         }
         
         // Store node data
-        mesh->vertices[i].x = x;
-        mesh->vertices[i].y = y;
-        mesh->vertices[i].z = 0.0f;  // Set z to 0 for 2D mesh
+        vertices[i].x = x;
+        vertices[i].y = y;
+        vertices[i].z = 0.0f;  // Set z to 0 for 2D mesh
     }
     
     // Skip to triangles section
@@ -89,7 +90,7 @@ Mesh* readMesh(const char* filename) {
     int numTriangles;
     if (sscanf(line, "Number of triangles %d", &numTriangles) != 1) {
         log_error("Invalid format for number of triangles");
-        free(mesh->vertices);
+        free(vertices);
         free(mesh);
         fclose(file);
         return NULL;
@@ -98,10 +99,10 @@ Mesh* readMesh(const char* filename) {
     log_info("Reading %d triangles...", numTriangles);
     
     mesh->numTriangles = numTriangles;
-    mesh->triangles = (Triangle*)malloc(numTriangles * sizeof(Triangle));
-    if (!mesh->triangles) {
+    triangles = (Triangle*)malloc(numTriangles * sizeof(Triangle));
+    if (!triangles) {
         log_error("Memory allocation error for triangles");
-        free(mesh->vertices);
+        free(vertices);
         free(mesh);
         fclose(file);
         return NULL;
@@ -117,9 +118,9 @@ Mesh* readMesh(const char* filename) {
         }
         
         // Store triangle data with 0-based indexing
-        mesh->triangles[triCount].v1 = v1;
-        mesh->triangles[triCount].v2 = v2;
-        mesh->triangles[triCount].v3 = v3;
+        triangles[triCount].v1 = v1;
+        triangles[triCount].v2 = v2;
+        triangles[triCount].v3 = v3;
         triCount++;
     }
     
@@ -137,10 +138,10 @@ Mesh* readMesh(const char* filename) {
     float minY = FLT_MAX, maxY = -FLT_MAX;
     
     for (int i = 0; i < mesh->numVertices; i++) {
-        if (mesh->vertices[i].x < minX) minX = mesh->vertices[i].x;
-        if (mesh->vertices[i].x > maxX) maxX = mesh->vertices[i].x;
-        if (mesh->vertices[i].y < minY) minY = mesh->vertices[i].y;
-        if (mesh->vertices[i].y > maxY) maxY = mesh->vertices[i].y;
+        if (vertices[i].x < minX) minX = vertices[i].x;
+        if (vertices[i].x > maxX) maxX = vertices[i].x;
+        if (vertices[i].y < minY) minY = vertices[i].y;
+        if (vertices[i].y > maxY) maxY = vertices[i].y;
     }
     
     // Calculate normalization parameters
@@ -158,30 +159,30 @@ Mesh* readMesh(const char* filename) {
     mesh->vertexArray = (float*)malloc(mesh->vertexArraySize * sizeof(float));
     if (!mesh->vertexArray) {
         log_error("Memory allocation error for vertex array");
-        free(mesh->triangles);
-        free(mesh->vertices);
+        free(triangles);
+        free(vertices);
         free(mesh);
         return NULL;
     }
     
     // Fill the vertex array with normalized coordinates
     for (int i = 0; i < mesh->numTriangles; i++) {
-        Triangle* tri = &mesh->triangles[i];
+        Triangle* tri = &triangles[i];
         
         // First vertex
-        mesh->vertexArray[i*9 + 0] = (mesh->vertices[tri->v1].x - centerX) * scale;
-        mesh->vertexArray[i*9 + 1] = (mesh->vertices[tri->v1].y - centerY) * scale;
-        mesh->vertexArray[i*9 + 2] = mesh->vertices[tri->v1].z;
+        mesh->vertexArray[i*9 + 0] = (vertices[tri->v1].x - centerX) * scale;
+        mesh->vertexArray[i*9 + 1] = (vertices[tri->v1].y - centerY) * scale;
+        mesh->vertexArray[i*9 + 2] = vertices[tri->v1].z;
         
         // Second vertex
-        mesh->vertexArray[i*9 + 3] = (mesh->vertices[tri->v2].x - centerX) * scale;
-        mesh->vertexArray[i*9 + 4] = (mesh->vertices[tri->v2].y - centerY) * scale;
-        mesh->vertexArray[i*9 + 5] = mesh->vertices[tri->v2].z;
+        mesh->vertexArray[i*9 + 3] = (vertices[tri->v2].x - centerX) * scale;
+        mesh->vertexArray[i*9 + 4] = (vertices[tri->v2].y - centerY) * scale;
+        mesh->vertexArray[i*9 + 5] = vertices[tri->v2].z;
         
         // Third vertex
-        mesh->vertexArray[i*9 + 6] = (mesh->vertices[tri->v3].x - centerX) * scale;
-        mesh->vertexArray[i*9 + 7] = (mesh->vertices[tri->v3].y - centerY) * scale;
-        mesh->vertexArray[i*9 + 8] = mesh->vertices[tri->v3].z;
+        mesh->vertexArray[i*9 + 6] = (vertices[tri->v3].x - centerX) * scale;
+        mesh->vertexArray[i*9 + 7] = (vertices[tri->v3].y - centerY) * scale;
+        mesh->vertexArray[i*9 + 8] = vertices[tri->v3].z;
     }
     
     // Print debug info for first triangle
@@ -196,14 +197,14 @@ Mesh* readMesh(const char* filename) {
     log_info("Mesh loaded successfully: %d vertices, %d triangles", 
            mesh->numVertices, mesh->numTriangles);
     
+    free(triangles);
+    free(vertices);
     return mesh;
 }
 
 // Function to free mesh resources
 void freeMesh(Mesh* mesh) {
     if (mesh) {
-        if (mesh->vertices) free(mesh->vertices);
-        if (mesh->triangles) free(mesh->triangles);
         if (mesh->vertexArray) free(mesh->vertexArray);
         free(mesh);
     }
