@@ -17,7 +17,6 @@ unsigned int load_mesh_into_vao(unsigned int VAO, Mesh *mesh,
     glBufferData(GL_ARRAY_BUFFER, mesh->vertexArraySize * sizeof(float),
                  mesh->vertexArray, GL_STATIC_DRAW);
   } else {
-    log_info("sub");
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, mesh->vertexArraySize * sizeof(float),mesh->vertexArray);
   }
@@ -41,7 +40,6 @@ unsigned int load_field_into_vao(unsigned int VAO, float *field, int size, unsig
     glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), field, GL_STATIC_DRAW);
     
   } else {
-    log_info("sub");
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, size * sizeof(float), field);
     
