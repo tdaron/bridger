@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <log.h>
 
 void processInput(GLFWwindow *window);
 void get_cursor_position(GLFWwindow *window, MeshSettings *s, double *xpos,
@@ -82,10 +83,12 @@ void get_cursor_position(GLFWwindow *window, MeshSettings *s, double *xpos,
 
 
   glfwGetCursorPos(window, xpos, ypos);
+  log_info("Click on: %f %f - Width: %d Height: %d", *xpos, *ypos, width, height);
 
   // Normalize to range [-1, 1]
   *xpos = 2.0 * (*xpos / width) - 1.0;
   *ypos = 1.0 - 2.0 * (*ypos /height);
+  log_info("After normalization: %f %f", *xpos, *ypos);
 }
 
 void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
@@ -94,6 +97,7 @@ void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
     double xpos;
     double ypos;
     get_cursor_position(window, &settings, &xpos, &ypos);
+    return;
     settings.holeX = dn(xpos, mesh, 0);
     settings.holeY = dn(ypos, mesh, 1);
     freeMesh(mesh);
