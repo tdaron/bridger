@@ -97,7 +97,6 @@ void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
     double xpos;
     double ypos;
     get_cursor_position(window, &settings, &xpos, &ypos);
-    return;
     settings.holeX = dn(xpos, mesh, 0);
     settings.holeY = dn(ypos, mesh, 1);
     freeMesh(mesh);
