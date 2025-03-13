@@ -79,7 +79,7 @@ void processInput(GLFWwindow *window) {
 void get_cursor_position(GLFWwindow *window, MeshSettings *s, double *xpos,
                          double *ypos) {
   int width, height;
-  glfwGetFramebufferSize(window, &width, &height);
+  glfwGetWindowSize(window, &width, &height);
 
 
   glfwGetCursorPos(window, xpos, ypos);
