@@ -1,3 +1,11 @@
 gmsh/
 build/
 .cache
+
+.venv
+.python-version
+pyproject.toml
+uv.lock
+
+.DS_Store
+__pycache__/
