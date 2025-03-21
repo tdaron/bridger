@@ -3,7 +3,7 @@ from problem import Domain, Problem
 import numpy as np
 from typing import List
 
-from plotter import plot_point_cloud
+from plot import plot_point_cloud
 
 # Equivalent function to the C version, using numpy arrays.
 def read_mesh(filename: str) -> Problem:

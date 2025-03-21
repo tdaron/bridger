@@ -3,9 +3,9 @@ from parser import read_mesh
 
 from boundary import add_boundary_condition, apply_neumann
 from solver import np_solve
-from assembler import assemble_system
+from assemble import assemble_system
 
-from plotter import plot_point_cloud_displacement
+from plot import plot_point_cloud_displacement
 
 def main():
     problem = read_mesh("./data/elasticity.txt")
@@ -33,6 +33,11 @@ def main():
 
 
     A, B = assemble_system(problem)
+
+    import matplotlib.pyplot as plt
+    plt.spy(A)
+    plt.show()
+
     B = apply_neumann(problem, B)
     solution = np_solve(A, B)
 

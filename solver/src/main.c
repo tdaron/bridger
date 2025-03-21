@@ -1,13 +1,18 @@
 #include <stdio.h>
 #include <solver.h>
 
-#include <fem.h>
+#include <problem.h>
+
+double fun(double x, double y)
+{
+    return 1;
+}
 
 int main() {
     ss_init();
     printf("Hello, World\n");
 
-    femGeo* theGeometry = geoMeshRead("../data/elasticity.txt");
+    geo* theGeometry = geoMeshRead("../data/elasticity.txt");
     geoMeshPrint(theGeometry);
 
 
@@ -16,17 +21,17 @@ int main() {
     double rho = 7.85e3;
     double g   = 9.81;
 
-    femProblem* theProblem = femElasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRAIN);
-    femElasticityAddBoundaryCondition(theProblem,"Symmetry",DIRICHLET_X,0.0);
-    femElasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
-    femElasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e4);
-    femElasticityPrint(theProblem);
+    problem* theProblem = elasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRAIN);
+    elasticityAddBoundaryCondition(theProblem,"Symmetry",DIRICHLET_X,0.0);
+    elasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
+    elasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e4);
+    elasticityPrint(theProblem);
 
-    double *theSoluce = femElasticitySolve(theProblem);
-    double *theForces = femElasticityForces(theProblem);
-    double area = femElasticityIntegrate(theProblem, fun);
+    double *theSoluce = elasticitySolve(theProblem);
+    double *theForces = elasticityForces(theProblem);
+    double area = elasticityIntegrate(theProblem, fun);
 
-    femNodes *theNodes = theGeometry->theNodes;
+    nodes *theNodes = theGeometry->theNodes;
     double deformationFactor = 1e5;
     double *normDisplacement = malloc(theNodes->nNodes * sizeof(double));
     double *forcesX = malloc(theNodes->nNodes * sizeof(double));
@@ -40,8 +45,8 @@ int main() {
         forcesX[i] = theForces[2*i+0];
         forcesY[i] = theForces[2*i+1]; }
 
-    double hMin = femMin(normDisplacement,theNodes->nNodes);
-    double hMax = femMax(normDisplacement,theNodes->nNodes);
+    double hMin = vecMin(normDisplacement,theNodes->nNodes);
+    double hMax = vecMax(normDisplacement,theNodes->nNodes);
     printf(" ==== Minimum displacement          : %14.7e [m] \n",hMin);
     printf(" ==== Maximum displacement          : %14.7e [m] \n",hMax);
 
