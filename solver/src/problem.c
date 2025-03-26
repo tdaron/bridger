@@ -138,6 +138,8 @@ void fullSystemAlloc(fullSystem *mySystem, int size) {
   mySystem->B = elem;
   mySystem->A[0] = elem + size;
   mySystem->size = size;
+  // This way of initializing A makes it so that it is
+  // compatible with band storage
   for (i = 1; i < size; i++)
     mySystem->A[i] = mySystem->A[i - 1] + size;
 }
