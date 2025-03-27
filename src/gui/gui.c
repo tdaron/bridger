@@ -5,13 +5,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 // Callback function for window resize events
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
   // Preserve the original aspect ratio by letterboxing/pillarboxing
-  float originalAspect = 800.0f / 600.0f;  // Original window size (assuming 800x600)
+  float originalAspect =
+      800.0f / 600.0f; // Original window size (assuming 800x600)
   float currentAspect = (float)width / (float)height;
-  
+
   if (currentAspect > originalAspect) {
     // Window is wider than original aspect, use height as limiting factor
     int viewportWidth = (int)(height * originalAspect);
@@ -52,6 +52,8 @@ GLFWwindow *createWindow(int width, int height, char *name) {
 
   glViewport(0, 0, width, height);
 
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   // Resize if the OS scales the window for highdpi
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   glfwGetFramebufferSize(window, &width, &height);
@@ -60,6 +62,11 @@ GLFWwindow *createWindow(int width, int height, char *name) {
   return window;
 }
 
+unsigned int create_vbo() {
+  unsigned int vbo;
+  glGenBuffers(1, &vbo);
+  return vbo;
+}
 unsigned int create_vao() {
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
