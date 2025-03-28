@@ -1,8 +1,13 @@
 #include "../include/problem.h"
+#include <stdio.h>
 
 double *elasticitySolve(problem *theProblem, int makeBanded) {
 
-    fullSystemInit(theProblem->system);
+    if (makeBanded) {
+        bandSystemInit(theProblem->system);
+    } else {
+        fullSystemInit(theProblem->system);
+    }
 
     if (makeBanded) {
         elasticityAssembleElementsBand(theProblem);
@@ -24,7 +29,8 @@ double *elasticitySolve(problem *theProblem, int makeBanded) {
     }
 
     if (makeBanded) {
-        bandSystemEliminate(theProblem->system);
+        bandSystemCholesky(theProblem->system);
+        // bandSystemEliminate(theProblem->system);
     } else {
         fullSystemEliminate(theProblem->system);
     }
@@ -131,7 +137,7 @@ double *bandSystemEliminate(linearSystem *myBand) {
       printf("Pivot value %e  ", A[k][k]);
       Error("Cannot eliminate with such a pivot");
     }
-    jend = fmin(size, k + band);
+    jend = fmin(size, k + band + 1);
     for (i = k + 1; i < jend; i++) {
       // Here we have swapped the usual A[i][k] for A[k][i]
       // because gaussian elimination preserves symmetry
@@ -144,12 +150,68 @@ double *bandSystemEliminate(linearSystem *myBand) {
   }
   for (i = size - 1; i >= 0; i--) {
     factor = 0;
-    jend = fmin(size, i + band);
+    jend = fmin(size, i + band + 1);
     for (j = i + 1; j < jend; j++) {
       factor += A[i][j] * B[j];
     }
     B[i] = (B[i] - factor) / A[i][i];
   }
 
+  return (myBand->B);
+}
+
+double *bandSystemCholesky(linearSystem *myBand) {
+  double **A, *B, factor, sum;
+  int i, j, k, jend, size, band;
+  A = myBand->A;
+  B = myBand->B;
+  size = myBand->size;
+  band = myBand->band;
+
+  // A completer :-)
+
+  // Factorization
+  for (i = 0; i < size; i++) {
+    int j0 = 0 > i - band ? 0 : i - band;
+    for (j = j0; j < i; j++) {
+      double sum = 0.0;
+      for (k = j0; k < j; k++) {
+        sum += A[i][k] * A[j][k];
+      }
+      A[i][j] = (A[i][j] - sum) / A[j][j];
+    }
+    sum = 0.0;
+    for (k = j0; k < i; k++) {
+        sum += A[i][k] * A[i][k];
+    }
+    if (A[i][i] - sum <= 0) {
+      printf("Pivot index %d  ", i);
+      printf("Pivot value %e  ", A[i][i]);
+      Error("Cannot eliminate with such a pivot");
+    }
+    A[i][i] = sqrt(A[i][i] - sum);
+  }
+
+  // Forward Substitution
+  // Cy = b
+  for (i = 0; i < size; i++) {
+    int j0 = 0 > i - band ? 0 : i - band;
+    sum = 0.0;
+    for (j = j0; j < i; j++) {
+      sum += A[i][j] * B[j];
+    }
+    B[i] = (B[i] - sum) / A[i][i];
+  }
+
+  // Backward Substitution
+  // C^T x = y
+    for (i = size - 1; i >= 0; i--) {
+        int jend = size < i + band + 1 ? size : i + band + 1;
+        sum = 0.0;
+        for (j = i + 1; j < jend; j++) {
+            sum += A[j][i] * B[j];
+        }
+        B[i] = (B[i] - sum) / A[i][i];
+    }
   return (myBand->B);
 }

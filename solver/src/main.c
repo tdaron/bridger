@@ -23,7 +23,7 @@ int main() {
     double g   = 9.81;
 
     // Flag that determines if the matrix is to be banded or full
-    int makeBanded = 0;
+    int makeBanded = 1;
 
     problem* theProblem = elasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRAIN, makeBanded);
 
@@ -47,17 +47,6 @@ int main() {
         solution_reorder[2 * theProblem->renumNew2Old[i / 2] + i % 2] = theSoluce[i];
     }
     theSoluce = solution_reorder;
-
-    // Wrtie the solution to a file
-    // FILE *file = fopen("solution.txt", "w");
-    // for (int i=0; i<theProblem->geometry->theNodes->nNodes; i++) {
-    //     // 10 digit precsion
-    //     fprintf(file, "%14.7e %14.7e\n", theSoluce[2*i+0], theSoluce[2*i+1]);
-    // }
-    // fclose(file);
-
-    // double *theForces = elasticityForces(theProblem);
-    // double area = elasticityIntegrate(theProblem, fun);
 
     nodes *theNodes = theGeometry->theNodes;
     double deformationFactor = 1e5;

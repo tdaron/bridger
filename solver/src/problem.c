@@ -159,29 +159,26 @@ void bandSystemAlloc(linearSystem *mySystem, int size) {
     fprintf(stderr, "Bandwidth set to -1 in bandSystemAlloc? What the fuck are you doing?\n");
     exit(1);
   }
-  double *elem = malloc(sizeof(double) * size * (band + 1));
+  double *elem = malloc(sizeof(double) * size * (band + 1 + 1));
   mySystem->A = malloc(sizeof(double *) * size);
   mySystem->B = elem;
   mySystem->A[0] = elem + size;
   mySystem->size = size;
   for (i = 1; i < size; i++)
-    mySystem->A[i] = mySystem->A[i - 1] + band - 1;
+    mySystem->A[i] = mySystem->A[i - 1] + band;
 }
 
 void fullSystemInit(linearSystem *mySystem) {
   int i, size = mySystem->size;
-  fprintf(stderr, "Debugfullsysinit1\n");
   for (i = 0; i < size * (size + 1); i++)
     mySystem->B[i] = 0;
-  fprintf(stderr, "Debugfullsysinit2\n");
 }
 
 void bandSystemInit(linearSystem *mySystem) {
-  int i, size = mySystem->size;
-  fprintf(stderr, "Debug2\n");
-  for (i = 0; i < size * (mySystem->band + 1); i++)
-    mySystem->B[i] = 0;
-  fprintf(stderr, "Debug2\n");
+  int i;
+  int size = mySystem->size;
+  for (i = 0; i < size * (mySystem->band + 1 + 1); i++)
+    mySystem->B[i] = 0.0;
 }
 
 void fullSystemPrint(linearSystem *mySystem) {
@@ -262,15 +259,13 @@ problem *elasticityCreate(
 
   // Calculate bandwith
   int max = 0;
-  for (int i = 0; i < nNodes; i++) {
+  for (int i = 0; i < theGeometry->theElements->nElem; i++) {
     for (int j = 0; j < nLocalNode; j++) {
 
       for (int k = 0; k < nLocalNode; k++) {
         int diff =
-            // theMesh->nodes->number[theMesh->elem[i * theMesh->nLocalNode + j]] -
-            // theMesh->nodes->number[theMesh->elem[i * theMesh->nLocalNode + k]];
-            theProblem->renumOld2New[theGeometry->theElements->elem[i * nLocalNode + j]] -
-            theProblem->renumOld2New[theGeometry->theElements->elem[i * nLocalNode + k]];
+            abs(theProblem->renumOld2New[theGeometry->theElements->elem[i * nLocalNode + j]] -
+            theProblem->renumOld2New[theGeometry->theElements->elem[i * nLocalNode + k]]);
         if (diff > max) {
           max = diff;
         }
@@ -284,9 +279,7 @@ problem *elasticityCreate(
   // is a single degree of freedom per node to a 2x2 block when there are 2.
   // For example, the matrix will always be at least of bandwidth 1.
   // We'll also include the diagonal in the bandwidth.
-  int bandwidth = 2 * max + 1 + 1;
-
-  fprintf(stderr, "Bandwidth : %d\n", bandwidth);
+  int bandwidth = 2 * max + 1;
 
   if (makeBanded)
     theProblem->system = bandSystemCreate(size, bandwidth);

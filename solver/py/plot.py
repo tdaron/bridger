@@ -36,6 +36,7 @@ def plot_point_cloud_displacement(problem, solution, deformation_factor=1e5):
     displacement_magnitude = np.sqrt(U[:, 0]**2 + U[:, 1]**2)
 
     print("Maximum displacement magnitude: {:.10e}".format(max(displacement_magnitude)))
+    print("Minimum displacement magnitude: {:.10e}".format(min(displacement_magnitude)))
 
     # Plot
     plt.figure()  # separate figure for this plot

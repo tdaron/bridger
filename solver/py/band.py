@@ -19,12 +19,13 @@ def renumber_x_axis(problem: Problem) -> Problem:
     #     for i in range(problem.n_local):
     #         element[i] = [x[0] for x in id_coords_list].index(element[i])
 
-    # problem.renum = [x[0] for x in id_coords_list]
+    problem.renum = [x[0] for x in id_coords_list]
     problem.order = [x[0] for x in id_coords_list]
     problem.renum = list(np.zeros(len(id_coords_list), dtype=int))
     for i in range(len(id_coords_list)):
         problem.renum[id_coords_list[i][0]] = i
-    print(problem.renum)
+    # problem.order = [x[0] for x in enumerate(id_coords_list)]
+    # problem.renum = [x[0] for x in enumerate(id_coords_list)]
 
     # problem.points = np.array([x[1] for x in id_coords_list])
 

@@ -168,6 +168,7 @@ void elasticityAssembleElementsBand(problem *theProblem);
 
 double *fullSystemEliminate(linearSystem *mySystem);
 double *bandSystemEliminate(linearSystem *myBand);
+double *bandSystemCholesky(linearSystem *myBand);
 
 double * elasticityForces(problem *theProblem);
 double *elasticitySolve(problem *theProblem, int makeBanded);

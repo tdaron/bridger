@@ -27,13 +27,15 @@ void problemXRenumber(problem *theProblem) {
     for (i = 0; i < problemGeomtery->theNodes->nNodes; i++) {
         theProblem->renumOld2New[(int)x[i][1]] = i;
         theProblem->renumNew2Old[i] = (int)x[i][1];
+        // theProblem->renumOld2New[i] = i;
+        // theProblem->renumNew2Old[i] = i;
         free(x[i]);
     }
     // Print the renumbering
-    printf("Renumbering : \n");
-    for (i = 0; i < problemGeomtery->theNodes->nNodes; i++) {
-        fprintf(stderr, "%d ", theProblem->renumOld2New[i]);
-    }
+    // printf("Renumbering : \n");
+    // for (i = 0; i < problemGeomtery->theNodes->nNodes; i++) {
+    //     fprintf(stderr, "%d ", theProblem->renumOld2New[i]);
+    // }
     free(x);
 }
 
