@@ -2,6 +2,8 @@ import numpy as np
 from scipy.sparse import csr_matrix
 import time
 
+from typing import List
+
 class Problem:
     """Mock Problem class for testing purposes"""
     def __init__(self, elements, points, n_local):
@@ -9,7 +11,7 @@ class Problem:
         self.points = points
         self.n_local = n_local
 
-def rcm(problem: Problem) -> tuple:
+def problem_coo(problem: Problem) -> List[tuple]:
     """Your implementation of CSR matrix creation"""
     # Initialize CSR matrix lists
     coo_adj = []
@@ -21,10 +23,13 @@ def rcm(problem: Problem) -> tuple:
     # Sort the list of tuples
     coo_adj.sort(key=lambda x: (x[0], x[1]))
 
+    return coo_adj
+
+def csr_from_coo(coo_adj: List[tuple], n_points: int) -> tuple:
+    """Convert COO adjacency list to CSR format"""
     # Create the CSR matrix
     col_index = []
-    row_index = list(np.zeros(problem.points.shape[0] + 1, dtype=int))
-    row_index = [0 for _ in range(problem.points.shape[0] + 1)]
+    row_index = np.zeros(n_points + 1, dtype=int)
 
     prev_row = coo_adj[0][0]
     prev = None
@@ -45,6 +50,14 @@ def rcm(problem: Problem) -> tuple:
         row_index[j] = len(col_index)
 
     return col_index, row_index
+
+def rcm(problem: Problem) -> tuple:
+    """Your implementation of CSR matrix creation"""
+    coo_adj = problem_coo(problem)
+    csr_col, csr_row = csr_from_coo(coo_adj, problem.points.shape[0])
+
+    return csr_col, csr_row
+
 
 def scipy_csr_matrix(problem: Problem) -> csr_matrix:
     """Create CSR matrix using SciPy for comparison"""

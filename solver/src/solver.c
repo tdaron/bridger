@@ -1,43 +1,42 @@
 #include "../include/problem.h"
 
-double *elasticitySolve(problem *theProblem){
-
-    //
-    // A completer :-)
-    //
+double *elasticitySolve(problem *theProblem, int makeBanded) {
 
     fullSystemInit(theProblem->system);
 
-    elasticityAssembleElements(theProblem);
-    // fprintf(stdout, "Assemble elements done\n");
+    if (makeBanded) {
+        elasticityAssembleElementsBand(theProblem);
+    } else {
+        elasticityAssembleElements(theProblem);
+    }
     elasticityAssembleNeumann(theProblem);
-    // fprintf(stdout, "Assemble Neumann done\n");
-
 
     int *theConstrainedNodes = theProblem->constrainedNodes;
     for (int i = 0; i < theProblem->system->size; i++) {
       if (theConstrainedNodes[i] != -1) {
-        // fprintf(stdout, "Constraining node %d\n", i);
         double value = theProblem->conditions[theConstrainedNodes[i]]->value;
-        fullSystemConstrain(theProblem->system, i, value);
+        if (makeBanded) {
+          bandSystemConstrain(theProblem->system, i, value);
+        } else {
+          fullSystemConstrain(theProblem->system, i, value);
+        }
       }
     }
 
-
-    fullSystemEliminate(theProblem->system);
+    if (makeBanded) {
+        bandSystemEliminate(theProblem->system);
+    } else {
+        fullSystemEliminate(theProblem->system);
+    }
 
     for (int i = 0; i < theProblem->system->size; i++) {
         theProblem->soluce[i] = theProblem->system->B[i];
     }
 
-    fprintf(stdout, "Done\n");
-
-    //
-
-     return theProblem->soluce;
+    return theProblem->soluce;
 }
 
-double *fullSystemEliminate(fullSystem *mySystem) {
+double *fullSystemEliminate(linearSystem *mySystem) {
   double **A, *B, factor;
   int i, j, k, size;
 
@@ -114,4 +113,43 @@ double * elasticityForces(problem *theProblem)
 
 
     return theProblem->residuals;
+}
+
+double *bandSystemEliminate(linearSystem *myBand) {
+  double **A, *B, factor;
+  int i, j, k, jend, size, band;
+  A = myBand->A;
+  B = myBand->B;
+  size = myBand->size;
+  band = myBand->band;
+
+  // A completer :-)
+
+  for (k = 0; k < size; k++) {
+    if (fabs(A[k][k]) <= 1e-8) {
+      printf("Pivot index %d  ", k);
+      printf("Pivot value %e  ", A[k][k]);
+      Error("Cannot eliminate with such a pivot");
+    }
+    jend = fmin(size, k + band);
+    for (i = k + 1; i < jend; i++) {
+      // Here we have swapped the usual A[i][k] for A[k][i]
+      // because gaussian elimination preserves symmetry
+      factor = A[k][i] / A[k][k];
+      for (j = i; j < jend; j++) {
+        A[i][j] -= A[k][j] * factor;
+      }
+      B[i] -= B[k] * factor;
+    }
+  }
+  for (i = size - 1; i >= 0; i--) {
+    factor = 0;
+    jend = fmin(size, i + band);
+    for (j = i + 1; j < jend; j++) {
+      factor += A[i][j] * B[j];
+    }
+    B[i] = (B[i] - factor) / A[i][i];
+  }
+
+  return (myBand->B);
 }

@@ -1,6 +1,6 @@
 #include "../include/problem.h"
 
-void fullSystemConstrain(fullSystem *mySystem, int myNode, double myValue) {
+void fullSystemConstrain(linearSystem *mySystem, int myNode, double myValue) {
   double **A, *B;
   int i, size;
 
@@ -20,6 +20,33 @@ void fullSystemConstrain(fullSystem *mySystem, int myNode, double myValue) {
   B[myNode] = myValue;
 }
 
+void bandSystemConstrain(linearSystem *mySystem, int myNode, double myValue) {
+  double **A, *B;
+  int i, size, band;
+
+  A = mySystem->A;
+  B = mySystem->B;
+  size = mySystem->size;
+  band = mySystem->band;
+
+
+  int lower_bound = 0 > myNode - band ? 0 : myNode - band;
+  int upper_bound = size < myNode + band + 1 ? size : myNode + band + 1;
+  for (i = lower_bound; i < upper_bound; i++) {
+    if (myNode > i) {
+        B[i] -= myValue * A[myNode][i];
+        A[myNode][i] = 0;
+        continue;
+    }
+    B[i] -= myValue * A[i][myNode];
+    A[i][myNode] = 0;
+  }
+
+  for (i = lower_bound; i < myNode; i++) A[myNode][i] = 0;
+
+  A[myNode][myNode] = 1;
+  B[myNode] = myValue;
+}
 
 void elasticityAddBoundaryCondition(problem *theProblem, char *nameDomain, boundaryType type, double value) {
   int iDomain = geoGetDomain(theProblem->geometry, nameDomain);
@@ -49,5 +76,6 @@ void elasticityAddBoundaryCondition(problem *theProblem, char *nameDomain, bound
   for (int e=0; e<nElem; e++) {
       for (int i=0; i<2; i++) {
           int node = theBoundary->domain->mesh->elem[2*elem[e]+i];
+          node = theProblem->renumOld2New[node];
           theProblem->constrainedNodes[2*node+shift] = size-1; }}
 }

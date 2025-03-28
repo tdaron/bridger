@@ -95,7 +95,8 @@ typedef struct {
   double *B;
   double **A;
   int size;
-} fullSystem;
+  int band;
+} linearSystem;
 
 typedef struct {
   double E, nu, rho, g;
@@ -107,7 +108,7 @@ typedef struct {
   geo *geometry;
   discrete *space;
   integration *rule;
-  fullSystem *system;
+  linearSystem *system;
 
   // New
   double* soluce;
@@ -115,6 +116,10 @@ typedef struct {
 
   discrete *spaceEdge;
   integration *ruleEdge;
+
+  int* renumOld2New;
+  int* renumNew2Old;
+
 } problem;
 
 void geoInitialize(geo *theGeometry);
@@ -124,13 +129,16 @@ void geoSetDomainName(geo *theGeometry, int iDomain, char *name);
 int geoGetDomain(geo *theGeometry, char *name);
 void geoMeshPrint(geo *theGeometry);
 
-fullSystem *femFullSystemCreate(int size);
-void fullSystemFree(fullSystem *theSystem);
-void fullSystemAlloc(fullSystem *mySystem, int size);
-void fullSystemInit(fullSystem *mySystem);
-void fullSystemPrint(fullSystem *mySystem);
+linearSystem *femFullSystemCreate(int size);
+linearSystem *bandFullSystemCreate(int size);
+void fullSystemFree(linearSystem *theSystem);
+void fullSystemAlloc(linearSystem *mySystem, int size);
+void bandSystemAlloc(linearSystem *mySystem, int size);
+void fullSystemInit(linearSystem *mySystem);
+void bandSystemInit(linearSystem *mySystem);
+void fullSystemPrint(linearSystem *mySystem);
 
-problem *elasticityCreate(geo *theGeometry, double E, double nu, double rho, double g, elasticCase iCase);
+problem *elasticityCreate(geo *theGeometry, double E, double nu, double rho, double g, elasticCase iCase, int makeBanded);
 void elasticityFree(problem *theProblem);
 void elasticityPrint(problem *theProblem);
 
@@ -140,7 +148,8 @@ void errorScan(int test, int line, char *file);
 double vecMin(double *x, int n);
 double vecMax(double *x, int n);
 
-void fullSystemConstrain(fullSystem *mySystem, int myNode, double myValue);
+void fullSystemConstrain(linearSystem *mySystem, int myNode, double myValue);
+void bandSystemConstrain(linearSystem *mySystem, int myNode, double myValue);
 void elasticityAddBoundaryCondition(problem *theProblem, char *nameDomain, boundaryType type, double value);
 
 discrete *discreteCreate(int n, elementType type);
@@ -155,7 +164,13 @@ int solutiondRead(int allocated_size, double *value, const char *filename);
 
 void elasticityAssembleElements(problem *theProblem);
 void elasticityAssembleNeumann(problem *theProblem);
+void elasticityAssembleElementsBand(problem *theProblem);
 
-double *fullSystemEliminate(fullSystem *mySystem);
+double *fullSystemEliminate(linearSystem *mySystem);
+double *bandSystemEliminate(linearSystem *myBand);
+
 double * elasticityForces(problem *theProblem);
-double *elasticitySolve(problem *theProblem);
+double *elasticitySolve(problem *theProblem, int makeBanded);
+
+// Renumbering related functions
+void problemXRenumber(problem *theProblem);

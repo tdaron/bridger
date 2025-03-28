@@ -51,6 +51,10 @@ class Problem:
         self.node_constraints = np.ones(n_points * 2, dtype=np.int_) * -1
         self.conditions = []
 
+        self.bandwidth = np.inf
+        self.renum = []
+        self.order = []
+
     def __str__(self):
         name = "triangles" if self.n_local == 3 else "quads"
         return (

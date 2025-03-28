@@ -117,40 +117,74 @@ void geoMeshPrint(geo *theGeometry) {
 }
 
 
-fullSystem *fullSystemCreate(int size) {
-  fullSystem *theSystem = malloc(sizeof(fullSystem));
+linearSystem *fullSystemCreate(int size) {
+  linearSystem *theSystem = malloc(sizeof(linearSystem));
+  theSystem->band = -1;
   fullSystemAlloc(theSystem, size);
   fullSystemInit(theSystem);
 
   return theSystem;
 }
 
-void fullSystemFree(fullSystem *theSystem) {
+linearSystem *bandSystemCreate(int size, int band) {
+  linearSystem *theSystem = malloc(sizeof(linearSystem));
+  theSystem->band = band;
+  bandSystemAlloc(theSystem, size);
+  bandSystemInit(theSystem);
+
+  return theSystem;
+}
+
+void fullSystemFree(linearSystem *theSystem) {
   free(theSystem->A);
   free(theSystem->B);
   free(theSystem);
 }
 
-void fullSystemAlloc(fullSystem *mySystem, int size) {
+void fullSystemAlloc(linearSystem *mySystem, int size) {
   int i;
   double *elem = malloc(sizeof(double) * size * (size + 1));
   mySystem->A = malloc(sizeof(double *) * size);
   mySystem->B = elem;
   mySystem->A[0] = elem + size;
   mySystem->size = size;
-  // This way of initializing A makes it so that it is
-  // compatible with band storage
   for (i = 1; i < size; i++)
     mySystem->A[i] = mySystem->A[i - 1] + size;
 }
 
-void fullSystemInit(fullSystem *mySystem) {
-  int i, size = mySystem->size;
-  for (i = 0; i < size * (size + 1); i++)
-    mySystem->B[i] = 0;
+void bandSystemAlloc(linearSystem *mySystem, int size) {
+  int i;
+  int band = mySystem->band;
+  if (band == -1) {
+    fprintf(stderr, "Bandwidth set to -1 in bandSystemAlloc? What the fuck are you doing?\n");
+    exit(1);
+  }
+  double *elem = malloc(sizeof(double) * size * (band + 1));
+  mySystem->A = malloc(sizeof(double *) * size);
+  mySystem->B = elem;
+  mySystem->A[0] = elem + size;
+  mySystem->size = size;
+  for (i = 1; i < size; i++)
+    mySystem->A[i] = mySystem->A[i - 1] + band - 1;
 }
 
-void fullSystemPrint(fullSystem *mySystem) {
+void fullSystemInit(linearSystem *mySystem) {
+  int i, size = mySystem->size;
+  fprintf(stderr, "Debugfullsysinit1\n");
+  for (i = 0; i < size * (size + 1); i++)
+    mySystem->B[i] = 0;
+  fprintf(stderr, "Debugfullsysinit2\n");
+}
+
+void bandSystemInit(linearSystem *mySystem) {
+  int i, size = mySystem->size;
+  fprintf(stderr, "Debug2\n");
+  for (i = 0; i < size * (mySystem->band + 1); i++)
+    mySystem->B[i] = 0;
+  fprintf(stderr, "Debug2\n");
+}
+
+void fullSystemPrint(linearSystem *mySystem) {
   double **A, *B;
   int i, j, size;
 
@@ -168,13 +202,20 @@ void fullSystemPrint(fullSystem *mySystem) {
   }
 }
 
-problem *elasticityCreate(geo *theGeometry, double E, double nu, double rho, double g, elasticCase iCase) {
+problem *elasticityCreate(
+    geo *theGeometry,
+    double E, double nu, double rho, double g,
+    elasticCase iCase,
+    int makeBanded)
+{
   problem *theProblem = malloc(sizeof(problem));
   theProblem->E = E;
   theProblem->nu = nu;
   theProblem->g = g;
   theProblem->rho = rho;
 
+  int nLocalNode = theGeometry->theElements->nLocalNode;
+  int nNodes = theGeometry->theNodes->nNodes;
 
   if (iCase == PLANAR_STRESS) {
     theProblem->A = E / (1 - nu * nu);
@@ -190,7 +231,6 @@ problem *elasticityCreate(geo *theGeometry, double E, double nu, double rho, dou
   theProblem->nBoundaryConditions = 0;
   theProblem->conditions = NULL;
 
-  int nNodes = theGeometry->theNodes->nNodes;
   int size = 2 * nNodes;
   theProblem->constrainedNodes = malloc(size * sizeof(int));
   theProblem->soluce = malloc(size * sizeof(double));
@@ -214,7 +254,45 @@ problem *elasticityCreate(geo *theGeometry, double E, double nu, double rho, dou
   theProblem->spaceEdge    = discreteCreate(2,FEM_EDGE);
   theProblem->ruleEdge     = integrationCreate(2,FEM_EDGE);
 
-  theProblem->system = fullSystemCreate(size);
+  theProblem->renumOld2New = malloc(sizeof(int)*nNodes);
+  theProblem->renumNew2Old = malloc(sizeof(int)*nNodes);
+
+  // Node Renumbering
+  problemXRenumber(theProblem);
+
+  // Calculate bandwith
+  int max = 0;
+  for (int i = 0; i < nNodes; i++) {
+    for (int j = 0; j < nLocalNode; j++) {
+
+      for (int k = 0; k < nLocalNode; k++) {
+        int diff =
+            // theMesh->nodes->number[theMesh->elem[i * theMesh->nLocalNode + j]] -
+            // theMesh->nodes->number[theMesh->elem[i * theMesh->nLocalNode + k]];
+            theProblem->renumOld2New[theGeometry->theElements->elem[i * nLocalNode + j]] -
+            theProblem->renumOld2New[theGeometry->theElements->elem[i * nLocalNode + k]];
+        if (diff > max) {
+          max = diff;
+        }
+      }
+    }
+  }
+
+
+  // Need to double the element id distance because of the 2 dofs per node
+  // and add 1 for the diagonal which goes from a single element when there
+  // is a single degree of freedom per node to a 2x2 block when there are 2.
+  // For example, the matrix will always be at least of bandwidth 1.
+  // We'll also include the diagonal in the bandwidth.
+  int bandwidth = 2 * max + 1 + 1;
+
+  fprintf(stderr, "Bandwidth : %d\n", bandwidth);
+
+  if (makeBanded)
+    theProblem->system = bandSystemCreate(size, bandwidth);
+  else
+    theProblem->system = fullSystemCreate(size);
+
   return theProblem;
 }
 

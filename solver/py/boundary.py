@@ -36,6 +36,47 @@ def apply_dirichlet_bc(A: np.ndarray, B: np.ndarray, dof: int, value: float) -> 
     # (4) Set the new RHS
     B[dof] = value
 
+def apply_dirichlet_bc_sym_banded(A: np.ndarray, B: np.ndarray, dof: int, value: float, bandwidth: int) -> None:
+    """
+    Enforces U[dof] = value in a symmetric fashion:
+      1) B[i] -= value*A[i,dof] for all i, then A[i,dof] = 0
+      2) A[dof,j] = 0 for all j
+      3) A[dof,dof] = 1
+      4) B[dof] = value
+    """
+    idx = lambda i, j, bw: (i + 1) * bw + j
+    size = len(B)
+    # (1) Update the entire B[] for the existing column
+    # we know the value of U[dof] so we can already update B[i]
+    # just as if U[dof] wasn't a variable
+    # for i in range(size):
+    #     B[i] -= value * A[i, dof]
+    #     A[i, dof] = 0.0
+
+    lower_bound = max(0, dof - bandwidth)
+    upper_bound = min(size, dof + bandwidth + 1)
+    for i in range(lower_bound, upper_bound):
+        if dof > i:
+            B[i] -= value * A[idx(dof, i, bandwidth)]
+            A[idx(dof, i, bandwidth)] = 0.0
+            continue
+        B[i] -= value * A[idx(i, dof, bandwidth)]
+        A[idx(i, dof, bandwidth)] = 0.0
+
+    # (2) Zero out row 'dof'
+    # for j in range(size):
+    #     A[dof, j] = 0.0
+
+    for j in range(lower_bound, dof):
+        A[idx(dof, j, bandwidth)] = 0.0
+
+    # (3) Set diagonal to 1
+    # A[dof, dof] = 1.0
+
+    A[idx(dof, dof, bandwidth)] = 1.0
+
+    # (4) Set the new RHS
+    B[dof] = value
 
 def apply_neumann(problem, B):
     """
@@ -78,6 +119,9 @@ def apply_neumann(problem, B):
             # Extract the 2 nodes that define this edge
             # e.g. edges[iEdge] => [node0, node1]
             map_ = edges[iEdge]  # shape (2,)
+
+            if problem.renum != []:
+                map_ = [problem.renum[i] for i in map_]
 
             # Coordinates of the 2 edge nodes
             x_e = points[map_, 0]  # array of length 2

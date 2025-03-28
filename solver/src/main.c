@@ -22,7 +22,10 @@ int main() {
     double rho = 7.85e3;
     double g   = 9.81;
 
-    problem* theProblem = elasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRAIN);
+    // Flag that determines if the matrix is to be banded or full
+    int makeBanded = 0;
+
+    problem* theProblem = elasticityCreate(theGeometry,E,nu,rho,g,PLANAR_STRAIN, makeBanded);
 
     // elasticityAddBoundaryCondition(theProblem,"Symmetry",DIRICHLET_X,0.0);
     // elasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
@@ -30,22 +33,31 @@ int main() {
 
     elasticityAddBoundaryCondition(theProblem,"Pillar1",DIRICHLET_Y,0.0);
     elasticityAddBoundaryCondition(theProblem,"Pillar2",DIRICHLET_Y,0.0);
+    elasticityAddBoundaryCondition(theProblem,"Pillar3",DIRICHLET_Y,0.0);
+    elasticityAddBoundaryCondition(theProblem,"Pillar4",DIRICHLET_Y,0.0);
 
-    fprintf(stdout, "Debug 1\n");
+    elasticityAddBoundaryCondition(theProblem,"Left",DIRICHLET_X,0.0);
+    elasticityAddBoundaryCondition(theProblem,"Right",DIRICHLET_X,0.0);
 
-    // elasticityPrint(theProblem);
+    double *theSoluce = elasticitySolve(theProblem, makeBanded);
 
-    fprintf(stdout, "Debug 2\n");
+    // Reorder Solution
+    double * solution_reorder = malloc(2*theProblem->geometry->theNodes->nNodes*sizeof(double));
+    for (int i=0; i<2*theProblem->geometry->theNodes->nNodes; i++) {
+        solution_reorder[2 * theProblem->renumNew2Old[i / 2] + i % 2] = theSoluce[i];
+    }
+    theSoluce = solution_reorder;
 
-    double *theSoluce = elasticitySolve(theProblem);
+    // Wrtie the solution to a file
+    // FILE *file = fopen("solution.txt", "w");
+    // for (int i=0; i<theProblem->geometry->theNodes->nNodes; i++) {
+    //     // 10 digit precsion
+    //     fprintf(file, "%14.7e %14.7e\n", theSoluce[2*i+0], theSoluce[2*i+1]);
+    // }
+    // fclose(file);
 
-    fprintf(stdout, "Debug 3\n");
-    double *theForces = elasticityForces(theProblem);
-
-    fprintf(stdout, "Debug 4\n");
-    double area = elasticityIntegrate(theProblem, fun);
-
-    fprintf(stdout, "Debug 5\n");
+    // double *theForces = elasticityForces(theProblem);
+    // double area = elasticityIntegrate(theProblem, fun);
 
     nodes *theNodes = theGeometry->theNodes;
     double deformationFactor = 1e5;
@@ -58,8 +70,9 @@ int main() {
         theNodes->Y[i] += theSoluce[2*i+1]*deformationFactor;
         normDisplacement[i] = sqrt(theSoluce[2*i+0]*theSoluce[2*i+0] +
                                     theSoluce[2*i+1]*theSoluce[2*i+1]);
-        forcesX[i] = theForces[2*i+0];
-        forcesY[i] = theForces[2*i+1]; }
+        // forcesX[i] = theForces[2*i+0];
+        // forcesY[i] = theForces[2*i+1];
+    }
 
     double hMin = vecMin(normDisplacement,theNodes->nNodes);
     double hMax = vecMax(normDisplacement,theNodes->nNodes);
