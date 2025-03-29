@@ -9,4 +9,5 @@ add_library(solver ${SRC_FILES})
 
 file(GLOB_RECURSE ALL_SRC_FILES src/*.c)
 add_executable(solver-bin ${ALL_SRC_FILES})
+target_link_libraries(solver-bin m)
 target_include_directories(solver-bin PRIVATE include)
