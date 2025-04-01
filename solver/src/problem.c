@@ -255,7 +255,8 @@ problem *elasticityCreate(
   theProblem->renumNew2Old = malloc(sizeof(int)*nNodes);
 
   // Node Renumbering
-  problemXRenumber(theProblem);
+  // problemXRenumber(theProblem);
+  rcm(theProblem);
 
   // Calculate bandwith
   int max = 0;
@@ -280,6 +281,8 @@ problem *elasticityCreate(
   // For example, the matrix will always be at least of bandwidth 1.
   // We'll also include the diagonal in the bandwidth.
   int bandwidth = 2 * max + 1;
+
+  fprintf(stderr, "Bandwidth: %d\n", bandwidth);
 
   if (makeBanded)
     theProblem->system = bandSystemCreate(size, bandwidth);

@@ -27,6 +27,7 @@ def extract_full_from_sym_banded(A, n, band):
     return A_full
 
 def main():
+    # problem = read_mesh("./data/elasticity.txt")
     problem = read_mesh("./data/mesh.txt")
 
     E = 211.e9
@@ -58,8 +59,16 @@ def main():
     add_boundary_condition(problem, left, "DIRICHLET_X", 0.0)
     add_boundary_condition(problem, right, "DIRICHLET_X", 0.0)
 
+
+    # symmetry = [i for i in problem.domains if i.name == "Symmetry"][0]
+    # bottom = [i for i in problem.domains if i.name == "Bottom"][0]
+
+    # add_boundary_condition(problem, symmetry, "DIRICHLET_X", 0.0)
+    # add_boundary_condition(problem, bottom, "DIRICHLET_Y", 0.0)
+
+
     # RCM renumbering
-    problem = renumber_x_axis(problem)
+    problem = rcm(problem)
 
     # Calculate bandwidth
     dist = 0
@@ -105,6 +114,7 @@ def main():
         solution_reordered[2 * problem.order[i // 2] + i % 2] = solution[i]
     solution = solution_reordered
 
+    # plot_point_cloud_displacement(problem, solution, deformation_factor=1e5)
     plot_point_cloud_displacement(problem, solution, deformation_factor=5e3)
 
 if __name__ == "__main__":

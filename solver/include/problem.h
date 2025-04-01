@@ -175,3 +175,4 @@ double *elasticitySolve(problem *theProblem, int makeBanded);
 
 // Renumbering related functions
 void problemXRenumber(problem *theProblem);
+void rcm(problem* theProblem);
