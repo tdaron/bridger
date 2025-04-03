@@ -6,7 +6,8 @@ layout (location = 2) in vec2 displacement;
 out vec3 vertexColor; // Output color to fragment shader
 
 // Scaling factor for the displacement effect on position
-const float FACTOR = 3000.0f;
+const float FACTOR = 1500.0f;
+const float COLOR_FACTOR = 3000.0f;
 
 // --- TUNABLE PARAMETER ---
 // Represents the scaled displacement magnitude that should result in full red.
@@ -22,7 +23,7 @@ const vec3 COLOR_HIGH = vec3(1.0, 0.0, 0.0); // Red
 
 // Define thresholds for color transitions (approx 0.0 -> 1/3 -> 2/3 -> 1.0)
 const float THRESHOLD1 = 1.0 / 3.0;
-const float THRESHOLD2 = 2.0 / 3.0;
+const float THRESHOLD2 = 3.0 / 4.0;
 
 void main()
 {
@@ -33,7 +34,7 @@ void main()
     // --- Color Calculation ---
 
     // Calculate the magnitude (length) of the scaled displacement vector
-    float displacementMagnitude = length(displacement * FACTOR);
+    float displacementMagnitude = length(displacement * COLOR_FACTOR);
 
     // Normalize the magnitude to a [0.0, 1.0] range.
     float normMag = clamp(displacementMagnitude / MAX_EXPECTED_SCALED_MAGNITUDE, 0.0, 1.0);
