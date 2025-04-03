@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.14)
 project(Solver)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Set degbug mode
+set(CMAKE_BUILD_TYPE Debug)
+
 file(GLOB_RECURSE SRC_FILES src/*.c)
 list(FILTER SRC_FILES EXCLUDE REGEX ".*/main\.c$")
 

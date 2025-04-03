@@ -271,7 +271,7 @@ def read_mesh_from_file(filename):
 
 def main():
     # Import from file
-    with open('data/mesh.txt', 'r') as f:
+    with open('data/mesh10.txt', 'r') as f:
         mesh_data = f.read()
 
     # Create a mesh object

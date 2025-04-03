@@ -13,7 +13,7 @@ int main() {
     printf("Hello, World\n");
 
     // geo* theGeometry = geoMeshRead("../data/elasticity.txt");
-    geo* theGeometry = geoMeshRead("../data/mesh.txt");
+    geo* theGeometry = geoMeshRead("../data/mesh10.txt");
     // geoMeshPrint(theGeometry);
 
 
@@ -31,13 +31,21 @@ int main() {
     // elasticityAddBoundaryCondition(theProblem,"Bottom",DIRICHLET_Y,0.0);
     // elasticityAddBoundaryCondition(theProblem,"Top",NEUMANN_Y,-1e4);
 
-    elasticityAddBoundaryCondition(theProblem,"Pillar1",DIRICHLET_Y,0.0);
-    elasticityAddBoundaryCondition(theProblem,"Pillar2",DIRICHLET_Y,0.0);
-    elasticityAddBoundaryCondition(theProblem,"Pillar3",DIRICHLET_Y,0.0);
-    elasticityAddBoundaryCondition(theProblem,"Pillar4",DIRICHLET_Y,0.0);
+    elasticityAddBoundaryCondition(theProblem,"PillarBottom_0",DIRICHLET_Y,0.0);
+    elasticityAddBoundaryCondition(theProblem,"PillarBottom_1",DIRICHLET_Y,0.0);
+    elasticityAddBoundaryCondition(theProblem,"PillarBottom_2",DIRICHLET_Y,0.0);
+    elasticityAddBoundaryCondition(theProblem,"PillarBottom_3",DIRICHLET_Y,0.0);
 
-    elasticityAddBoundaryCondition(theProblem,"Left",DIRICHLET_X,0.0);
-    elasticityAddBoundaryCondition(theProblem,"Right",DIRICHLET_X,0.0);
+    elasticityAddBoundaryCondition(theProblem,"PillarBottom_0",DIRICHLET_X,0.0);
+    elasticityAddBoundaryCondition(theProblem,"PillarBottom_1",DIRICHLET_X,0.0);
+    elasticityAddBoundaryCondition(theProblem,"PillarBottom_2",DIRICHLET_X,0.0);
+    elasticityAddBoundaryCondition(theProblem,"PillarBottom_3",DIRICHLET_X,0.0);
+
+    elasticityAddBoundaryCondition(theProblem,"LeftCorner",DIRICHLET_X,0.0);
+    elasticityAddBoundaryCondition(theProblem,"RightCorner",DIRICHLET_X,0.0);
+
+    elasticityAddBoundaryCondition(theProblem,"LeftCorner",DIRICHLET_Y,0.0);
+    elasticityAddBoundaryCondition(theProblem,"RightCorner",DIRICHLET_Y,0.0);
 
     double *theSoluce = elasticitySolve(theProblem, makeBanded);
 
