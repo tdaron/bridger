@@ -14,7 +14,7 @@ class Domain:
 
 class Mesh:
     def __init__(self):
-        self.nodes = None  # (n_nodes, 3) array with x,y,z coordinates
+        self.nodes = None  # (n_nodes, w) array with x,y coordinates
         self.edges = None  # (n_edges, 2) array with node indices
         self.triangles = None  # (n_triangles, 3) array with node indices
         self.domains = []  # List of Domain objects
@@ -29,7 +29,7 @@ class Mesh:
         i = 0
         line = lines[i]
         n_nodes = int(line.split()[-1])
-        self.nodes = np.zeros((n_nodes, 3))
+        self.nodes = np.zeros((n_nodes, 2))
 
         for j in range(n_nodes):
             i += 1
@@ -43,8 +43,7 @@ class Mesh:
             coords = parts[1].strip().split()
             x = float(coords[0])
             y = float(coords[1])
-            z = float(coords[2])
-            self.nodes[node_id] = [x, y, z]
+            self.nodes[node_id] = [x, y]
 
         # Find and parse edges
         while i < len(lines):
@@ -86,34 +85,6 @@ class Mesh:
                     n3 = int(nodes[2])
                     self.triangles[tri_id] = [n1, n2, n3]
 
-            # # Parse domains
-            # elif "Number of domains" in lines[i]:
-            #     n_domains = int(lines[i].split()[-1])
-
-            #     d = 0
-            #     while d < n_domains and i < len(lines):
-            #         i += 1
-            #         if "Domain :" in lines[i]:
-            #             domain_id = int(lines[i].split()[-1])
-
-            #             i += 1
-            #             domain_name = lines[i].split(':', 1)[1].strip()
-
-            #             i += 1
-            #             n_elements = int(lines[i].split()[-1])
-
-            #             # Read elements (they may span multiple lines)
-            #             elements = []
-            #             while len(elements) < n_elements and i + 1 < len(lines):
-            #                 i += 1
-            #                 if "Domain :" in lines[i]:
-            #                     i -= 1  # Go back one line
-            #                     break
-            #                 elements.extend(int(x) for x in lines[i].split())
-
-            #             domain_elements = np.array(elements[:n_elements], dtype=int)
-            #             self.domains.append(Domain(domain_name, domain_elements))
-            #             d += 1
             self.domains = []
             i += 1
 
