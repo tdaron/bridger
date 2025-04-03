@@ -211,7 +211,7 @@ void rcm(problem* theProblem) {
     int* queue = malloc(nNodes * sizeof(int));
     int* order = queue;
     // int* order = malloc(nNodes * sizeof(int));
-    int* visited = malloc(nNodes * sizeof(bool));
+    bool* visited = malloc(nNodes * sizeof(bool));
     for (int i = 0; i < nNodes; i++) {
         visited[i] = false;
     }
