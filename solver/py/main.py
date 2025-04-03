@@ -28,7 +28,7 @@ def extract_full_from_sym_banded(A, n, band):
 
 def main():
     # problem = read_mesh("./data/elasticity.txt")
-    problem = read_mesh("./data/mesh10.txt")
+    problem = read_mesh("./data/mensh.txt")
 
     E = 211.e9
     nu = 0.3
@@ -43,21 +43,28 @@ def main():
         problem.B = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
         problem.C = E / (2.0 * (1.0 + nu));
 
-    pillar1 = [i for i in problem.domains if i.name == "PillarBottom_0"][0]
-    pillar2 = [i for i in problem.domains if i.name == "PillarBottom_1"][0]
-    pillar3 = [i for i in problem.domains if i.name == "PillarBottom_2"][0]
-    pillar4 = [i for i in problem.domains if i.name == "PillarBottom_3"][0]
+    pillar1 = [i for i in problem.domains if i.name == "Pillar1"][0]
+    pillar2 = [i for i in problem.domains if i.name == "Pillar2"][0]
+    pillar3 = [i for i in problem.domains if i.name == "Pillar3"][0]
+    pillar4 = [i for i in problem.domains if i.name == "Pillar4"][0]
 
-    left = [i for i in problem.domains if i.name == "LeftCorner"][0]
-    right = [i for i in problem.domains if i.name == "RightCorner"][0]
+    left = [i for i in problem.domains if i.name == "Extremity0"][0]
+    right = [i for i in problem.domains if i.name == "Extremity1"][0]
 
     add_boundary_condition(problem, pillar1, "DIRICHLET_Y", 0.0)
     add_boundary_condition(problem, pillar2, "DIRICHLET_Y", 0.0)
     add_boundary_condition(problem, pillar3, "DIRICHLET_Y", 0.0)
     add_boundary_condition(problem, pillar4, "DIRICHLET_Y", 0.0)
 
+    add_boundary_condition(problem, pillar1, "DIRICHLET_X", 0.0)
+    add_boundary_condition(problem, pillar2, "DIRICHLET_X", 0.0)
+    add_boundary_condition(problem, pillar3, "DIRICHLET_X", 0.0)
+    add_boundary_condition(problem, pillar4, "DIRICHLET_X", 0.0)
+
     add_boundary_condition(problem, left, "DIRICHLET_X", 0.0)
     add_boundary_condition(problem, right, "DIRICHLET_X", 0.0)
+    add_boundary_condition(problem, left, "DIRICHLET_Y", 0.0)
+    add_boundary_condition(problem, right, "DIRICHLET_Y", 0.0)
 
 
     # symmetry = [i for i in problem.domains if i.name == "Symmetry"][0]
@@ -114,8 +121,8 @@ def main():
         solution_reordered[2 * problem.order[i // 2] + i % 2] = solution[i]
     solution = solution_reordered
 
-    # plot_point_cloud_displacement(problem, solution, deformation_factor=1e5)
-    plot_point_cloud_displacement(problem, solution, deformation_factor=5e3)
+    plot_point_cloud_displacement(problem, solution, deformation_factor=1e5)
+    # plot_point_cloud_displacement(problem, solution, deformation_factor=5e3)
 
 if __name__ == "__main__":
     main()
