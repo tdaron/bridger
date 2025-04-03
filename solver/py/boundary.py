@@ -78,6 +78,17 @@ def apply_dirichlet_bc_sym_banded(A: np.ndarray, B: np.ndarray, dof: int, value:
     # (4) Set the new RHS
     B[dof] = value
 
+def apply_dirichlet_bc_coo(coo: np.ndarray, B: np.ndarray, dof: int, value: float, nnz: int) -> None:
+    """
+    Enforces U[dof] = value in a symmetric fashion:
+      1) B[i] -= value*A[i,dof] for all i, then A[i,dof] = 0
+      2) A[dof,j] = 0 for all j
+      3) A[dof,dof] = 1
+      4) B[dof] = value
+    """
+    pass
+
+
 def apply_neumann(problem, B):
     """
     Assembles the Neumann (force) contributions on boundary edges
