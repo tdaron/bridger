@@ -2,7 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-void getColor(double value, int numberOfColors, float *r, float *g, float *b) {
+void getColor(double value, int numberOfColors, double *r, double *g, double *b) {
   if (value > 1)
     value = 1;
   value = value * (numberOfColors);
@@ -28,8 +28,8 @@ double glScale(double minimum, double maximum, double value) {
 }
 
 
-float* compute_field(Mesh* mesh, MeshSettings* s) {
-  float *field = malloc(mesh->numTriangles * 9 * sizeof(float));
+double* compute_field(Mesh* mesh, MeshSettings* s) {
+  double *field = malloc(mesh->numTriangles * 9 * sizeof(double));
 
   for (int i = 0; i < mesh->numTriangles; i++) {
 
@@ -37,9 +37,9 @@ float* compute_field(Mesh* mesh, MeshSettings* s) {
   getSize(dn(mesh->vertexArray[i * 9 + j * 3], mesh, 0),                       \
           dn(mesh->vertexArray[i * 9 + j * 3 + 1], mesh, 1), s)
     for (int j = 0; j < 3; j++) {
-      float r;
-      float g;
-      float b;
+      double r;
+      double g;
+      double b;
       getColor(glScale(s->preciseElementSize, s->baseElementSize,
                        size(i, j)),
                50, &r, &g, &b);

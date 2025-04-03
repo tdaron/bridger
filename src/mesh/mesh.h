@@ -43,4 +43,4 @@ Mesh* generate_mesh(MeshSettings* s, double* scale);
 double normalize_mesh(Mesh* mesh);
 double getSize(double x, double y, MeshSettings* s);
 double dn(double coord, Mesh* mesh, int k);
-float* compute_field(Mesh* mesh, MeshSettings* s);
+double* compute_field(Mesh* mesh, MeshSettings* s);
