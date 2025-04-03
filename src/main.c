@@ -30,8 +30,10 @@ double *field;
 double scale = 0;
 unsigned int meshVBO;
 unsigned int fieldVBO;
+unsigned int soluceVBO;
 int windowWidth, windowHeight;
 float tankDx = 0;
+geo *geometry;
 int main() {
   int ierr;
   ss_init();
@@ -40,8 +42,7 @@ int main() {
 
   gpu_mesh = generate_mesh(&settings, &scale);
 
-  geo* geometry;
-  double* soluce = compute_solution("solver/data/mesh.txt", NULL, &geometry);
+  double *soluce = compute_solution("solver/data/mesh.txt", NULL, &geometry);
   field = compute_field(gpu_mesh, &settings);
   // Mesh *mesh = readMesh("data/mesh.txt");
 
@@ -52,7 +53,7 @@ int main() {
   vao = create_vao();
   meshVBO = load_mesh_into_vao(vao, gpu_mesh, 0);
   fieldVBO = load_field_into_vao(vao, field, gpu_mesh->numTriangles * 3 * 3, 0);
-  int soluceVBO = load_soluce_into_vao(vao, soluce, geometry, 0, gpu_mesh->scale);
+  soluceVBO = load_soluce_into_vao(vao, soluce, geometry, 0, gpu_mesh->scale);
 
   glfwSetMouseButtonCallback(window, mouse_callback);
 
@@ -67,7 +68,7 @@ int main() {
     glUseProgram(shaderProgram);
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, gpu_mesh->numTriangles * 3);
-    DrawImage("assets/winki.png", -0.9+tankDx, 0.2, 0.8);
+    DrawImage("assets/winki.png", -0.9 + tankDx, 0.2, 0.8);
     glfwGetWindowSize(window, &windowWidth, &windowHeight);
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -82,8 +83,10 @@ int main() {
 void processInput(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
-  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) tankDx += 0.01;
-  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) tankDx -= 0.01;
+  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    tankDx += 0.01;
+  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    tankDx -= 0.01;
 }
 
 void get_cursor_position(GLFWwindow *window, MeshSettings *s, double *xpos,
@@ -109,12 +112,15 @@ void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
     settings.holeY = dn(ypos, gpu_mesh, 1);
     freeMesh(gpu_mesh);
     gpu_mesh = generate_mesh(&settings, &scale);
-    printf("Adding hole at %f %f\n", dn(xpos, gpu_mesh, 0), dn(ypos, gpu_mesh, 1));
+    printf("Adding hole at %f %f\n", dn(xpos, gpu_mesh, 0),
+           dn(ypos, gpu_mesh, 1));
     free(field);
     field = compute_field(gpu_mesh, &settings);
     meshVBO = load_mesh_into_vao(vao, gpu_mesh, meshVBO);
-    fieldVBO =
-        load_field_into_vao(vao, field, gpu_mesh->numTriangles * 3 * 3, fieldVBO);
+    fieldVBO = load_field_into_vao(vao, field, gpu_mesh->numTriangles * 3 * 3,
+                                   fieldVBO);
+  double *soluce = compute_solution("solver/data/mesh.txt", NULL, &geometry);
+    soluceVBO = load_soluce_into_vao(vao, soluce, geometry, 0, gpu_mesh->scale);
     glfwPostEmptyEvent();
   }
 }
