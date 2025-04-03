@@ -28,7 +28,7 @@ def extract_full_from_sym_banded(A, n, band):
 
 def main():
     # problem = read_mesh("./data/elasticity.txt")
-    problem = read_mesh("./data/mensh.txt")
+    problem = read_mesh("./data/mesh.txt")
 
     E = 211.e9
     nu = 0.3

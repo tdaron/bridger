@@ -14,7 +14,7 @@ int main() {
 
     // geo* theGeometry = geoMeshRead("../data/elasticity.txt");
     // geo* theGeometry = geoMeshRead("../data/mesh10.txt");
-    geo* theGeometry = geoMeshRead("../data/mensh.txt");
+    geo* theGeometry = geoMeshRead("../data/mesh.txt");
     // geoMeshPrint(theGeometry);
 
 

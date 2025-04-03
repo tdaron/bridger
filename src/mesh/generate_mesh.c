@@ -1,6 +1,7 @@
 #include "gmshc.h"
 #include "mesh.h"
 #include <log.h>
+#include <math.h>
 #include <stdlib.h>
 Mesh *load_mesh_and_write_to_file(double *scale);
 
@@ -82,6 +83,77 @@ double meshSize(int dim, int tag, double x, double y, double z, double lc,
   return getSize(x, y, global_s);
 }
 
+void find_pillars_and_extremities(double *xyz, size_t nNode, size_t *edgeNode, size_t nEdge, int ***pillarEdges, int **nPillarEdges, int ***extremityEdges, int **nExtremityEdges, MeshSettings *s) {
+  double minY = 1e12;
+  double maxY = -1e12;
+  double minX = 1e12;
+  double maxX = -1e12;
+
+  // Find min and max Y coordinates
+  for (size_t i = 0; i < nNode; i++) {
+    if (xyz[3 * i + 1] < minY) minY = xyz[3 * i + 1];
+    if (xyz[3 * i + 1] > maxY) maxY = xyz[3 * i + 1];
+  }
+
+  // Find min and max X coordinates
+  for (size_t i = 0; i < nNode; i++) {
+    if (xyz[3 * i] < minX) minX = xyz[3 * i];
+    if (xyz[3 * i] > maxX) maxX = xyz[3 * i];
+  }
+
+  // Identify pillar edges and extremity edges
+  *pillarEdges = malloc(s->pillarsNumber * sizeof(int *));
+  *nPillarEdges = malloc(s->pillarsNumber * sizeof(int));
+  for (int i = 0; i < s->pillarsNumber; i++) {
+    (*pillarEdges)[i] = malloc(nEdge * sizeof(int));
+    (*nPillarEdges)[i] = 0;
+  }
+  *extremityEdges = malloc(2 * sizeof(int *));
+  (*extremityEdges)[0] = malloc(nEdge * sizeof(int));
+  (*extremityEdges)[1] = malloc(nEdge * sizeof(int));
+  *nExtremityEdges = malloc(sizeof(int) * 2);
+  (*nExtremityEdges)[0] = 0;
+  (*nExtremityEdges)[1] = 0;
+
+  for (int i = 0; i < nEdge; i++) {
+    int n1 = edgeNode[2 * i] - 1;
+    int n2 = edgeNode[2 * i + 1] - 1;
+
+    double x1 = xyz[3 * n1];
+    double y1 = xyz[3 * n1 + 1];
+    double x2 = xyz[3 * n2];
+    double y2 = xyz[3 * n2 + 1];
+
+    // Identify pillar edges
+    if (fabs(y1 - minY) < 1 && fabs(y2 - minY) < 1) {
+      for (int j = 0; j < s->pillarsNumber; j++) {
+        double px = get_pillar_x(j, s);
+        if ((x1 >= px && x1 <= px + s->pillarsWidth) || (x2 >= px && x2 <= px + s->pillarsWidth)) {
+          (*pillarEdges)[j][(*nPillarEdges)[j]] = i;
+          (*nPillarEdges)[j]++;
+          break;
+        }
+      }
+    }
+
+    // Identify extremity edges
+    if ((fabs(x1 - minX) < 1 && fabs(x2 - minX) < 1)) {
+      if (fabs(y1-maxY) <= 1e-5 && fabs(y2-maxY) <= 1e-5) {
+        continue;
+      }
+      (*extremityEdges)[0][(*nExtremityEdges)[0]] = i;
+      (*nExtremityEdges)[0]++;
+    }
+    if ((fabs(x1 - maxX) < 1 && fabs(x2 - maxX) < 1)) {
+      if (fabs(y1-maxY) <= 1e-5 && fabs(y2-maxY) <= 1e-5) {
+        continue;
+      }
+      (*extremityEdges)[1][(*nExtremityEdges)[1]] = i;
+      (*nExtremityEdges)[1]++;
+    }
+  }
+}
+
 Mesh *generate_mesh(MeshSettings *s, double *scale) {
   // cursed. who cares.
   global_s = s;
@@ -143,9 +215,10 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
   // Write nodes to file
   fprintf(file, "Number of nodes %zu \n", nNode);
   for (int i = 0; i < nNode; i++) {
-    fprintf(file, "%6d : %14.7e %14.7e %14.7e\n", i, xyz[3 * node[i] - 3],
-            xyz[3 * node[i] - 2], xyz[3 * node[i] - 1]);
+    fprintf(file, "%6d : %14.7e %14.7e\n", i, xyz[3 * node[i] - 3],
+            xyz[3 * node[i] - 2]);
   }
+
 
   // Getting edges
   size_t nEdge, *edgeElem;
@@ -160,8 +233,13 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
     fprintf(file, "%6d : %6d %6d \n", i, (int)edgeNode[2 * i] - 1,
             (int)edgeNode[2 * i + 1] - 1);
   }
-  gmshFree(edgeElem);
-  gmshFree(edgeNode);
+
+
+  // Analyze geometry to create domains
+  int **pillarEdges, **extremityEdges;
+  int *nPillarEdges, *nExtremityEdges;
+  find_pillars_and_extremities(xyz, nNode, edgeNode, nEdge, &pillarEdges, &nPillarEdges, &extremityEdges, &nExtremityEdges, global_s);
+
 
   // Getting triangles
   size_t nElem, *elem;
@@ -173,57 +251,47 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
   fprintf(file, "Number of triangles %zu \n", nElem);
   for (int i = 0; i < nElem; i++) {
     fprintf(file, "%6d : %6d %6d %6d\n", i, (int)node[3 * i] - 1,
-            (int)node[3 * i + 1] - 1, (int)node[3 * i + 2] - 1);
+            (int)node[3 * i + 1] - 1, (int)node[3*i+2] - 1);
   }
-
-  // Getting domains (1D entities)
-  int *dimTags;
-  size_t nDomains;
-  gmshModelGetEntities(&dimTags, &nDomains, 1, &ierr);
-  ErrorGmsh(ierr);
-  nDomains = nDomains / 2;
 
   // Write domains to file
-  fprintf(file, "Number of domains %zu\n", nDomains);
+  int totalDomains = global_s->pillarsNumber + 2; // Number of pillars + 2 extremities
+  fprintf(file, "Number of domains %d\n", totalDomains);
 
-  for (int i = 0; i < nDomains; i++) {
-    int dim = dimTags[2 * i + 0];
-    int tag = dimTags[2 * i + 1];
-
-    // Get domain elements
-    int *elementType;
-    size_t nElementType, **elementTags, *nElementTags, nnElementTags,
-        **nodesTags, *nNodesTags, nnNodesTags;
-    gmshModelMeshGetElements(&elementType, &nElementType, &elementTags,
-                             &nElementTags, &nnElementTags, &nodesTags,
-                             &nNodesTags, &nnNodesTags, dim, tag, &ierr);
-    ErrorGmsh(ierr);
-
-    fprintf(file, "  Domain : %6d \n", i);
-    fprintf(file, "  Name : Entity %d \n", tag - 1);
-    fprintf(file, "  Number of elements : %6zu\n", nElementTags[0]);
-
-    // Write domain elements
-    for (int j = 0; j < nElementTags[0]; j++) {
-      fprintf(file, "%6zu",
-              elementTags[0][j] - 1); // Adjust element indices to be 0-based
-      if ((j + 1) != nElementTags[0] && (j + 1) % 10 == 0)
+  // Write pillar domains
+  for (int i = 0; i < global_s->pillarsNumber; i++) {
+    fprintf(file, "  Domain : %6d\n", i+1);
+    fprintf(file, "  Name : Pillar%d\n", i+1);
+    fprintf(file, "  Number of elements : %6u\n", nPillarEdges[i]);
+    for (int j = 0; j < nPillarEdges[i]; j++) {
+      fprintf(file, "%6d ", pillarEdges[i][j]);
+      if ((j + 1) % 10 == 0) {
         fprintf(file, "\n");
+      }
     }
     fprintf(file, "\n");
-
-    // Free allocated memory for domain elements
-    gmshFree(nElementTags);
-    gmshFree(nNodesTags);
-    gmshFree(elementTags[0]);
-    gmshFree(elementTags);
-    gmshFree(nodesTags[0]);
-    gmshFree(nodesTags);
-    gmshFree(elementType);
+    free(pillarEdges[i]);
   }
-  gmshFree(dimTags);
+
+  // Write extremity domains
+  for (int i = 0; i < 2; i++) {
+    fprintf(file, "  Domain : %6d \n", global_s->pillarsNumber + i);
+    fprintf(file, "  Name : Extremity%d\n", i);
+    fprintf(file, "  Number of elements : %6u\n", nExtremityEdges[i]);
+    for (int j = 0; j < nExtremityEdges[i]; j++) {
+      fprintf(file, "%6d ", extremityEdges[i][j]);
+      if ((j + 1) % 10 == 0) {
+        fprintf(file, "\n");
+      }
+    }
+    fprintf(file, "\n");
+    free(extremityEdges[i]);
+  }
 
   fclose(file);
+  free(pillarEdges);
+  free(extremityEdges);
+  free(nPillarEdges);
 
   // Create and return the mesh
   Mesh *mesh = malloc(sizeof(Mesh));
@@ -246,6 +314,8 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
     }
   }
 
+  gmshFree(edgeElem);
+  gmshFree(edgeNode);
   gmshFree(xyz);
   gmshFree(trash);
   gmshFree(node);
