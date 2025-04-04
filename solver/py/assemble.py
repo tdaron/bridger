@@ -340,10 +340,9 @@ def assemble_csr_system(problem):
                 B_global[i_dof_x] += 0.0
                 B_global[i_dof_y] -= (rho * g * phi[i_loc] * weight * J_e)
         nnz += local_nnz
-    print("initial nnz", nnz)
+    # print("COO nnz = ", nnz)
     coo_global = coo_global[:nnz, :]
     coo_vals = coo_vals[:nnz]
-    # print(coo_global[-300:, :])
 
     # To sort by first column, then second column
     sort_indices = np.lexsort((coo_global[:,1], coo_global[:,0]))
@@ -352,52 +351,15 @@ def assemble_csr_system(problem):
     coo_global = coo_global[sort_indices]
     coo_vals = coo_vals[sort_indices]
 
-    # Compare third column of coo_global to coo_vals
-    # assert np.allclose(coo_global[:, 2], coo_vals), "COO values do not match"
-
-    # print(coo_global[-300:, :])
-
-    # Extract CSR using Scipy
-    from scipy.sparse import coo_matrix
-    coo = coo_matrix((coo_global[:, 2], (coo_global[:, 0], coo_global[:, 1])), shape=(n_dof, n_dof))
-    csr = coo.tocsr()
-
-    # Convert to CSR format
-    col_index, row_index, values = csr_from_coo(coo_global, nnz, n_points)
-    print("CSR STUFF", len(col_index), len(row_index), len(values))
-    print(np.count_nonzero(values > 1e-12))
     col_index, row_index, values = csr_from_coo2(coo_global, coo_vals, nnz, n_points)
-    print("CSR STUFF", len(col_index), len(row_index), len(values))
-    print(np.count_nonzero(values > 1e-12))
+    print(np.count_nonzero(values))
+    print(np.count_nonzero(abs(values) > 1e-6))
 
     A = np.zeros((n_dof, n_dof), dtype=np.float64)
     for i in range(len(row_index) - 1):
         for j in range(row_index[i], row_index[i + 1]):
             A[i, col_index[j]] = values[j]
     coo_global = A
-
-    # Compare coo_global to god_damn
-    print("COO Global")
-    print(coo_global[:10, :10])
-    print("God Damn")
-    print(god_damn[:10, :10])
-
-
-
-    # Compare to scipy
-
-    # print("Scipy CSR Test")
-    # A = csr.tocsc()
-    # print(A.shape)
-    # print(A.data.shape)
-    # print(np.count_nonzero(A.data > 1e-12))
-    # A2 = np.array((row_index, col_index, values), dtype=object)
-    # print(A2.shape)
-    # assert np.array_equal(A.data, A2.data), "Data mismatch"
-    # print("Scipy CSR Test Passed")
-
-    # exit(1)
-    # coo_global = csr.toarray().astype(np.float64)
 
     # Apply Dirichlet BCs
     for bc in problem.conditions:
@@ -423,100 +385,44 @@ def assemble_csr_system(problem):
 def csr_from_coo2(coo_adj: NDArray, coo_vals, nnz: int, n_points: int) -> tuple:
     """Convert COO adjacency list to CSR format"""
     # Create the CSR matrix
-    # col_index = []
     col_index = np.zeros(nnz, dtype=int)
     row_index = np.zeros(n_points * 2 + 1, dtype=int)
     values = np.zeros(nnz, dtype=float)
 
-    # prev_row = coo_adj[0][0]
     prev_row = 0
-    # prev = np.zeros(2, dtype=int)
     prev = np.array([-1, -1], dtype=int)
     nnz_new = 0
     for i in range(len(coo_adj)):
-        # Skip duplicates
-        # if prev == coo_adj[i][:2]:
+        # Add values of duplicate entries
+        # to the last entry which is the first
+        # of the duplicates and was added to the lists.
+        # The is because we assume the input coo
+        # lists are sorted by column then row.
         if np.array_equal(prev, coo_adj[i][:2]):
             # values[nnz_new - 1] += coo_adj[i][2]
             values[nnz_new - 1] += coo_vals[i]
             continue
-        # col_index.append(coo_adj[i][1])
-        col_index[nnz_new] = coo_adj[i][1]
-        # values[nnz_new] = coo_adj[i][2]
-        values[nnz_new] = coo_vals[i]
-        nnz_new += 1
-        # Set all absent rows that were skipped to the
-        # current column index.
-        for j in range(prev_row, coo_adj[i][0]):
-            # row_index[j + 1] = len(col_index) - 1
-            row_index[j + 1] = nnz_new - 1
-        prev_row = coo_adj[i][0]
-        prev = coo_adj[i][:2].copy()
+        if abs(coo_vals[i]) > 1e-10:
+            col_index[nnz_new] = coo_adj[i][1]
+            values[nnz_new] = coo_vals[i]
+            nnz_new += 1
+            # Set all absent rows that were skipped to the
+            # current column index, this way they don't
+            # have any values associated with them.
+            for j in range(prev_row, coo_adj[i][0]):
+                row_index[j + 1] = nnz_new - 1
+            prev_row = coo_adj[i][0]
+            prev = coo_adj[i][:2].copy()
+
 
     # Make sure to update the last rows that might be empty
     for j in range(prev_row + 1, len(row_index)):
-        row_index[j] = len(col_index)
         row_index[j] = nnz_new
 
-    print(nnz_new)
+    # print()
 
     # Remove unused elements
     col_index = col_index[:nnz_new]
     values = values[:nnz_new]
-
-    return col_index, row_index, values
-
-def csr_from_coo(coo_data, nnz, n_points):
-    """
-    Convert COO format to CSR format, removing duplicates by summing values.
-
-    Args:
-        coo_data: Array of shape (nnz, 3) containing (row, col, value) triplets
-        nnz: Number of non-zero elements
-        n_points: Number of points in the problem
-
-    Returns:
-        col_index: Column indices for CSR format
-        row_index: Row pointers for CSR format
-        values: Non-zero values for CSR format
-    """
-    import numpy as np
-
-    # Number of degrees of freedom (2 per point)
-    n_dof = 2 * n_points
-
-    # Aggregate duplicate entries
-    coo_dict = {}
-    for i in range(nnz):
-        row, col, val = coo_data[i]
-        key = (row, col)
-        if key in coo_dict:
-            coo_dict[key] += val
-        else:
-            coo_dict[key] = val
-
-    # Filter out near-zero values and convert to list of (row, col, val)
-    coo_list = [(row, col, val) for (row, col), val in coo_dict.items() if abs(val) > 1e-12]
-
-    # Sort by row, then column
-    coo_list.sort()
-
-    # Count non-zeros per row
-    nnz_per_row = np.zeros(n_dof, dtype=np.int64)
-    for row, _, _ in coo_list:
-        nnz_per_row[row] += 1
-
-    # Create row_index using cumulative sum
-    row_index = np.zeros(n_dof + 1, dtype=np.int64)
-    row_index[1:] = np.cumsum(nnz_per_row)
-
-    # Create and fill values and col_index arrays
-    nnz_unique = len(coo_list)
-    values = np.zeros(nnz_unique, dtype=np.float64)
-    col_index = np.zeros(nnz_unique, dtype=np.int64)
-
-    for i, (_, col, val) in enumerate(coo_list):
-        values[i] = val
-        col_index[i] = col
 
     return col_index, row_index, values
