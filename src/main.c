@@ -20,12 +20,15 @@ MeshSettings settings = {.bridgeHeight = .8,
                          .pillarsHeight = 3.5,
                          .pillarsNumber = 4,
                          .offset = 3,
-                         .baseElementSize = 0.5,
+                         .baseElementSize = 0.2,
                          .preciseElementSize = 0.1,
                          .precisionRadius = 2,
                          .tankLength = 4,
                          .tankWeight = -100000,
-                         .tankX = 0.526316};
+                         .tankX = 0.526316,
+                         .holeRadius = 0.40
+
+                       };
 
 Mesh *gpu_mesh;
 unsigned int vao;

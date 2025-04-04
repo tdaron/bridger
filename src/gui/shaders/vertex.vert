@@ -8,7 +8,7 @@ out vec3 vertexColor; // Output color to fragment shader
 uniform int seeDisformation;
 
 // Scaling factor for the displacement effect on position
-const float FACTOR = 485.0f;
+const float FACTOR = 685.0f;
 const float COLOR_FACTOR = 5000.0f;
 
 // --- TUNABLE PARAMETER ---

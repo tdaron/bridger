@@ -43,6 +43,7 @@ typedef struct {
   double tankLength;
   double tankWeight;
   double tankX;
+  double holeRadius;
 } MeshSettings;
 
 Mesh *generate_mesh(MeshSettings *s, double *scale);

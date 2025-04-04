@@ -228,7 +228,7 @@ Mesh *generate_mesh(MeshSettings *s, double *scale) {
   }
 
   if (s->holeX != 0) {
-    int idHole = gmshModelOccAddDisk(s->holeX, s->holeY, 0, 0.6, 0.6, -1, NULL,
+    int idHole = gmshModelOccAddDisk(s->holeX, s->holeY, 0, s->holeRadius, s->holeRadius, -1, NULL,
                                      0, NULL, 0, &ierr);
     int hole[] = {2, idHole};
     gmshModelOccCut(bridge, 2, hole, 2, NULL, NULL, NULL, NULL, NULL, -1, 1, 1,
