@@ -8,7 +8,7 @@ int main() {
   problem *theProblem;
   geo *theGeometry;
   double *theSoluce =
-      compute_solution2("../data/mesh.txt", &theProblem, &theGeometry, 0, NULL, 0);
+      compute_solution("../data/mesh.txt", &theProblem, &theGeometry, 0, NULL, 0);
 
   fprintf(stderr, " ==== Problem solved \n");
   nodes *theNodes = theGeometry->theNodes;
@@ -29,7 +29,7 @@ int main() {
   printf(" ==== Maximum displacement          : %14.7e [m] \n",hMax);
 
   geoFree(theGeometry);
-  elasticityFree(theProblem);
+  // elasticityFree(theProblem);
   free(theGeometry);
   free(theSoluce);
 }
