@@ -8,7 +8,7 @@ int main() {
   problem *theProblem;
   geo *theGeometry;
   double *theSoluce =
-      compute_solution("../data/mesh.txt", &theProblem, &theGeometry, 0, NULL, 0);
+      compute_solution("./data/mesh.txt", &theProblem, &theGeometry, 0, NULL, 0);
 
   fprintf(stderr, " ==== Problem solved \n");
   nodes *theNodes = theGeometry->theNodes;
