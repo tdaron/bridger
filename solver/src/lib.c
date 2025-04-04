@@ -59,8 +59,8 @@ double *compute_solution(char *filename, problem **prob, geo **geom, int nTankEd
   elasticityAddBoundaryCondition(theProblem, "Extremity1", DIRICHLET_Y, 0.0);
   elasticityAddBoundaryCondition(theProblem, "Extremity0", DIRICHLET_Y, 0.0);
 
-  elasticityAddBoundaryCondition(theProblem, "Tank", DIRICHLET_Y, 0.0);
-  elasticityAddBoundaryCondition(theProblem, "Tank", DIRICHLET_Y, 0.0);
+  // elasticityAddBoundaryCondition(theProblem, "Tank", DIRICHLET_Y, 0.0);
+  // elasticityAddBoundaryCondition(theProblem, "Tank", DIRICHLET_Y, 0.0);
 
 
   // Print max value of B vector

@@ -73,7 +73,7 @@ int main() {
     glUniform1i(seeDisformationUniform, seeDisformation);
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, gpu_mesh->numTriangles * 3);
-    DrawImage("assets/winki.png", -0.9 + tankDx, 0.2, 0.8);
+    DrawImage("assets/tank.png", -0.9 + tankDx, 0.2, 0.8);
     glfwGetWindowSize(window, &windowWidth, &windowHeight);
     glfwSwapBuffers(window);
     settings.tankX = ((-0.9 + tankDx) / scale) + gpu_mesh->centers[0];
