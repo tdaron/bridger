@@ -128,6 +128,60 @@ void elasticityAssembleNeumann(problem *theProblem){
     }
 }
 
+// Calcule et assemble toutes les intégrales de ligne.
+// Ce sont les intégrales associées aux conditions de
+// Neumann de la formulation discrète.
+void elasticityAssembleNeumannExplicit(problem *theProblem, int* edges, int num_edges) {
+   linearSystem  *theSystem = theProblem->system;
+   integration *theRule = theProblem->ruleEdge;
+   discrete    *theSpace = theProblem->spaceEdge;
+   geo         *theGeometry = theProblem->geometry;
+   nodes       *theNodes = theGeometry->theNodes;
+   mesh        *theEdges = theGeometry->theEdges;
+   double x[2],y[2],phi[2], dphidx[2];
+   int iBnd,iElem,iInteg,iEdge,i,j,d,map[2],mapU[2];
+   int nLocal = 2;
+   double *B  = theSystem->B;
+
+   double value = 100;
+
+    int shift = 1;
+
+    // Iterate over the number of edges in the domain
+    for (iEdge = 0; iEdge < num_edges; iEdge++) {
+        // Get the actual element index
+        iElem = theGeometry->theEdges->elem[edges[iEdge]];
+
+        // For each edge, we only have the shape functions
+        // associated with the two nodes of the edge. that
+        // are non-zero.
+        for (j = 0; j < nLocal; j++) {
+            map[j] = theEdges->elem[iElem * nLocal + j];
+            x[j] = theNodes->X[map[j]];
+            y[j] = theNodes->Y[map[j]];
+            map[j] = theProblem->renumOld2New[map[j]];
+        }
+
+        // Apply the integration rule to the edge.
+        for (iInteg = 0; iInteg < theRule->n; iInteg++) {
+            double xsi = theRule->xsi[iInteg];
+            double weight = theRule->weight[iInteg];
+
+            theSpace->phi(xsi, phi);
+            theSpace->dphidx(xsi, dphidx);
+
+            double dxdxsi = 0;
+            for (i = 0; i < theSpace->n; i++) {
+                dxdxsi += x[i] * dphidx[i];
+            }
+            double jac = fabs(dxdxsi);
+            for (i = 0; i < theSpace->n; i++) {
+                B[2 * map[i] + shift] += phi[i] * value * weight * jac;
+            }
+        }
+    }
+}
+
 
 void elasticityAssembleElementsBand(problem *theProblem){
     linearSystem  *theSystem = theProblem->system;
