@@ -164,7 +164,7 @@ void elasticityAssembleNeumannExplicit(problem *theProblem, int *edges,
     // associated with the two nodes of the edge. that
     // are non-zero.
     for (j = 0; j < nLocal; j++) {
-      map[j] = theEdges->elem[edges[i] * nLocal + j];
+      map[j] = theEdges->elem[edges[iEdge] * nLocal + j];
       x[j] = theNodes->X[map[j]];
       y[j] = theNodes->Y[map[j]];
       map[j] = theProblem->renumOld2New[map[j]];
