@@ -135,9 +135,6 @@ void regen_solution() {
   int *tankEdges;
   int nTankEdges;
   find_tank_edges(gpu_mesh, &tankEdges, &nTankEdges, &settings);
-  for (int i = 0; i < nTankEdges; i++) {
-    printf("Tank edge: %d\n", tankEdges[i]);
-  }
   double *soluce = compute_solution("solver/data/mesh.txt", NULL, &geometry, nTankEdges,
                                     tankEdges, settings.tankWeight);
   soluceVBO = load_soluce_into_vao(vao, soluce, geometry, 0, gpu_mesh->scale);

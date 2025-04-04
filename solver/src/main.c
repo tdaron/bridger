@@ -7,7 +7,7 @@ int main() {
   problem *theProblem;
   geo *theGeometry;
   double *theSoluce =
-      compute_solution("./data/mesh.txt", &theProblem, &theGeometry, 0, NULL, 0);
+      compute_solution("../data/mensh.txt", &theProblem, &theGeometry, 0, NULL, 0);
 
   nodes *theNodes = theGeometry->theNodes;
   double deformationFactor = 1e5;
@@ -23,11 +23,6 @@ int main() {
     // forcesX[i] = theForces[2*i+0];
     // forcesY[i] = theForces[2*i+1];
   }
-  double hMin = vecMin(normDisplacement, theNodes->nNodes);
-  double hMax = vecMax(normDisplacement, theNodes->nNodes);
-  printf(" ==== Minimum displacement          : %14.7e [m] \n", hMin);
-  printf(" ==== Maximum displacement          : %14.7e [m] \n", hMax);
-
   FILE *file = fopen("solution.txt", "w");
 
   for (int i = 0; i < theProblem->geometry->theNodes->nNodes; i++) {
