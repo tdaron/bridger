@@ -34,6 +34,9 @@ unsigned int soluceVBO;
 int windowWidth, windowHeight;
 float tankDx = 0;
 geo *geometry;
+
+int seeDisformation = 1.0;
+
 int main() {
   int ierr;
   ss_init();
@@ -58,6 +61,10 @@ int main() {
   glfwSetMouseButtonCallback(window, mouse_callback);
 
   time_t old = time(NULL);
+
+  unsigned int seeDisformationUniform =
+      glGetUniformLocation(shaderProgram, "seeDisformation");
+
   while (!glfwWindowShouldClose(window)) {
     time_t new = time(NULL);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -66,6 +73,7 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(shaderProgram);
+    glUniform1i(seeDisformationUniform, seeDisformation);
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, gpu_mesh->numTriangles * 3);
     DrawImage("assets/winki.png", -0.9 + tankDx, 0.2, 0.8);
@@ -80,6 +88,7 @@ int main() {
   return 0;
 }
 
+static int prevTKeyState = GLFW_RELEASE; // Store previous state of T key
 void processInput(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
@@ -87,6 +96,12 @@ void processInput(GLFWwindow *window) {
     tankDx += 0.01;
   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
     tankDx -= 0.01;
+  if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS &&
+      prevTKeyState == GLFW_RELEASE) {
+    seeDisformation = !seeDisformation; // Toggle only on key press (not hold)
+  }
+
+  prevTKeyState = glfwGetKey(window, GLFW_KEY_T); // Update previous state
 }
 
 void get_cursor_position(GLFWwindow *window, MeshSettings *s, double *xpos,
@@ -119,7 +134,7 @@ void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
     meshVBO = load_mesh_into_vao(vao, gpu_mesh, meshVBO);
     fieldVBO = load_field_into_vao(vao, field, gpu_mesh->numTriangles * 3 * 3,
                                    fieldVBO);
-  double *soluce = compute_solution("solver/data/mesh.txt", NULL, &geometry);
+    double *soluce = compute_solution("solver/data/mesh.txt", NULL, &geometry);
     soluceVBO = load_soluce_into_vao(vao, soluce, geometry, 0, gpu_mesh->scale);
     glfwPostEmptyEvent();
   }

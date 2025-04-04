@@ -5,6 +5,8 @@ layout (location = 2) in vec2 displacement;
 
 out vec3 vertexColor; // Output color to fragment shader
 
+uniform int seeDisformation;
+
 // Scaling factor for the displacement effect on position
 const float FACTOR = 1500.0f;
 const float COLOR_FACTOR = 3000.0f;
@@ -29,7 +31,11 @@ void main()
 {
     // Calculate the displaced vertex position
     vec3 displacedPos = vec3(aPos.x + displacement.x * FACTOR, aPos.y + displacement.y * FACTOR, aPos.z);
-    gl_Position = vec4(displacedPos, 1.0);
+    if (seeDisformation == 1) {
+        gl_Position = vec4(displacedPos, 1.0);
+    } else {
+        gl_Position = vec4(aPos, 1.0);
+    }
 
     // --- Color Calculation ---
 

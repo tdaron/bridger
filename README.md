@@ -75,13 +75,4 @@ Once the simulation is running:
 
 Shortcuts:
 
-- We had grand plans for implementing helpful shortcuts.
-- TODO: Actually implement some shortcuts. Please, benevolent spirit of project deadlines, grant us more time! (If you're reading this, the spirit was probably busy elsewhere.)
-
-## Future Dreams & Known Quirks
-
-- Clean up the legacy mesh code in src/mesh.
-- Implement those elusive shortcuts.
-- Maybe add more tanks? Or different types of bridges? (Scope creep, hello!)
-
-Enjoy exploring the precarious situation of Yevgeny and his bridge! We hope you (and the grader!) appreciate the simulation and the character of the code.
+- **Toogle visibility of deformation**: Press `T` to toogle the deformation visibility
