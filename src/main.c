@@ -24,7 +24,7 @@ MeshSettings settings = {.bridgeHeight = .8,
                          .preciseElementSize = 0.1,
                          .precisionRadius = 2,
                          .tankLength = 4,
-                         .tankWeight = 1000000,
+                         .tankWeight = -100000,
                          .tankX = 0};
 
 Mesh *gpu_mesh;
@@ -52,6 +52,8 @@ int main() {
 
   vao = create_vao();
   regen_mesh();
+  settings.tankX = ((-0.9 + tankDx) / scale) + gpu_mesh->centers[0];
+  regen_solution();
 
   glfwSetMouseButtonCallback(window, mouse_callback);
 
@@ -141,13 +143,13 @@ void regen_solution() {
 void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
   // Left button  &&  pushed
   if (button == 0 && action == 0) {
-    double xpos;
-    double ypos;
-    get_cursor_position(window, &settings, &xpos, &ypos);
-    settings.holeX = dn(xpos, gpu_mesh, 0);
-    settings.holeY = dn(ypos, gpu_mesh, 1);
-    printf("Adding hole at %f %f\n", dn(xpos, gpu_mesh, 0),
-           dn(ypos, gpu_mesh, 1));
+    // double xpos;
+    // double ypos;
+    // get_cursor_position(window, &settings, &xpos, &ypos);
+    // settings.holeX = dn(xpos, gpu_mesh, 0);
+    // settings.holeY = dn(ypos, gpu_mesh, 1);
+    // printf("Adding hole at %f %f\n", dn(xpos, gpu_mesh, 0),
+    //        dn(ypos, gpu_mesh, 1));
     regen_mesh();
     glfwPostEmptyEvent();
   }

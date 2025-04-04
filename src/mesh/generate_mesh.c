@@ -112,7 +112,7 @@ void find_tank_edges(Mesh *mesh, int **tankEdges, int *ntankEdges,
     double y2 = xyz[3 * n2 + 1];
 
     // Identify tank edges
-    if (fabs(y1 - maxY) <= 1e-5) {
+    if (fabs(y1 - maxY) <= 1e-5 && fabs(y2 - maxY) <= 1e-5) {
       if ((x1 > s->tankX && x1 < s->tankX + s->tankLength) ||
           (x2 > s->tankX && x2 < s->tankX + s->tankLength)) {
         (*tankEdges)[*ntankEdges] = i;
