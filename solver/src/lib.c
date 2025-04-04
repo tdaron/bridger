@@ -81,14 +81,6 @@ double *compute_solution(char *filename, problem **prob, geo **geom, int nTankEd
   }
   theSoluce = solution_reorder;
 
-
-  // Apply a small offset to edges passed as paramters
-  for (int i = 0; i < nTankEdges; i++) {
-      fprintf(stderr, "Tank edge num %i", TankEdges[i]);
-      theSoluce[theProblem->geometry->theEdges->elem[2 * TankEdges[i]]]+= 1e-6;
-      theSoluce[theProblem->geometry->theEdges->elem[2 * TankEdges[i]] + 1] += 1e-6;
-  }
-
   nodes *theNodes = theGeometry->theNodes;
   double deformationFactor = 1e5;
   double *normDisplacement = malloc(theNodes->nNodes * sizeof(double));
