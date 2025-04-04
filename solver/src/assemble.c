@@ -158,13 +158,13 @@ void elasticityAssembleNeumannExplicit(problem *theProblem, int *edges,
   // Iterate over the number of edges in the domain
   for (iEdge = 0; iEdge < num_edges; iEdge++) {
     // Get the actual element index
-    iElem = theGeometry->theEdges->elem[edges[iEdge]];
+    // iElem = theGeometry->theEdges->elem[edges[iEdge]];
 
     // For each edge, we only have the shape functions
     // associated with the two nodes of the edge. that
     // are non-zero.
     for (j = 0; j < nLocal; j++) {
-      map[j] = theEdges->elem[iElem * nLocal + j];
+      map[j] = theEdges->elem[edges[i] * nLocal + j];
       x[j] = theNodes->X[map[j]];
       y[j] = theNodes->Y[map[j]];
       map[j] = theProblem->renumOld2New[map[j]];
