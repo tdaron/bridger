@@ -7,11 +7,11 @@
 
 ## The Saga of Yevgeny's Bridge Problem...
 
-Meet Yevgeny. Yevgeny has a T-80 battle tank and a penchant for, let's say, energetic infrastructure testing. While using a certain beam bridge over the Dnieper for target practice, his expert marksmanship (with a 125mm explosive shell, no less) takes out the central beam. Boom.
+Yevgeny has a T-80 battle tank and a penchant for energetic infrastructure testing. While using a certain beam bridge over a tributary of the Dnieper for target practice, his expert marksmanship pierces one of the beams right in the middle. Boom.
 
-To his surprise, the bridge, though wounded, defiantly remains standing. Before Yevgeny can deliver a coup de grâce, his lieutenant radios in: "Forget the fireworks, Yevgeny, we need to cross that river and visit the next village!"
+To his surprise, the bridge, though damaged, remains standing. Before Yevgeny can deliver a coup de grâce, his lieutenant radios in: "Yevgeny, you need to cross that river and attack the next village!"
 
-Oops. The critical question arises: Can this spectacularly damaged bridge handle the hefty weight of Yevgeny's T-80? That's what this project aims to find out (through the magic of finite element analysis, of course!).
+Oops. The critical question arises: Can this damaged bridge handle the weight of Yevgeny's T-80? That's what this project aims to find out (through the magic of finite element analysis, of course!).
 
 ## Table of Contents
 
@@ -31,9 +31,9 @@ This repository contains our code for the LEPL1110 Finite Element Method project
 
 We've structured the code into two main parts:
 
-- **The Main Project (Root Directory)**: This is the whole shebang. It handles mesh generation (using gmsh), rendering the bridge and tank (via glfw, glad, and our own lightweight graphics code found in src/gui), loading assets (stb_image.h), and logging useful (or cryptic) messages (log.c). It depends on the solver library below.
+- **The Main Project (Root Directory)**: Handles mesh generation (using gmsh), rendering the bridge and tank (via glfw, glad, and our own lightweight graphics code found in src/gui), loading assets (stb_image.h), and logging useful (or cryptic) messages (log.c). It depends on the solver library below.
 
-- **The Standalone Solver (solver/ directory)**: Nestled inside the solver directory is the heart of the FEA simulation. It's an independent library, crafted from scratch with C, containing our finite-element method implementation. Not any dependencies here!
+- **The Standalone Solver (solver/ directory)**: Heart of the FEA simulation. It's an independent library, containing our finite-element method implementation. No dependencies here!
 
 ## Dependencies: The Necessary Evils
 
