@@ -3,7 +3,6 @@
 
 /// @returns the value of scale
 double normalize_mesh(Mesh *mesh) {
-  log_info("Normalizing mesh coordinates: num triangles: %d", mesh->numTriangles);
   float max[3] = {0, 0, 0};
   float min[3] = {0, 0, 0};
   for (int i = 0; i < mesh->numTriangles; i++) {
@@ -30,10 +29,6 @@ double normalize_mesh(Mesh *mesh) {
 
   float centers[3] = {(min[0] + max[0]) / 2, (min[1] + max[1]) / 2,
                       (min[2] + max[2]) / 2};
-  log_info("Mesh bounds: X[%.2f, %.2f, %.2f], Y[%.2f, %.2f, %.2f]", min[0],
-           max[0], min[1], max[1], min[2], max[2]);
-  log_info("Center: (%.2f, %.2f, %.2f), Scale: %.5f", centers[0], centers[1],
-           centers[2], scale);
 
   mesh->centers[0] = centers[0];
   mesh->centers[1] = centers[1];

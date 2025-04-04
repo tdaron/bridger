@@ -44,6 +44,8 @@ int main() {
   int ierr;
   ss_init();
   gmshInitialize(0, NULL, 1, 0, &ierr);
+  gmshOptionSetNumber("General.Terminal", 0, NULL);
+  gmshOptionSetNumber("General.Verbosity", 0, NULL);
   printf("GMSH loaded\n");
 
   GLFWwindow *window = createWindow(800, 600, "Bridger");
@@ -135,8 +137,8 @@ void regen_solution() {
   int *tankEdges;
   int nTankEdges;
   find_tank_edges(gpu_mesh, &tankEdges, &nTankEdges, &settings);
-  double *soluce = compute_solution("solver/data/mesh.txt", NULL, &geometry, nTankEdges,
-                                    tankEdges, settings.tankWeight);
+  double *soluce = compute_solution("solver/data/mesh.txt", NULL, &geometry,
+                                    nTankEdges, tankEdges, settings.tankWeight);
   soluceVBO = load_soluce_into_vao(vao, soluce, geometry, 0, gpu_mesh->scale);
 }
 

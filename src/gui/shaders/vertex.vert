@@ -8,13 +8,13 @@ out vec3 vertexColor; // Output color to fragment shader
 uniform int seeDisformation;
 
 // Scaling factor for the displacement effect on position
-const float FACTOR = 1500.0f;
-const float COLOR_FACTOR = 3000.0f;
+const float FACTOR = 265.0f;
+const float COLOR_FACTOR = 5000.0f;
 
 // --- TUNABLE PARAMETER ---
 // Represents the scaled displacement magnitude that should result in full red.
 // Adjust as needed for your data range.
-const float MAX_EXPECTED_SCALED_MAGNITUDE = 0.01f;
+const float MAX_EXPECTED_SCALED_MAGNITUDE = 0.05f;
 // -------------------------
 
 // Define key colors for the new gradient
@@ -25,7 +25,7 @@ const vec3 COLOR_HIGH = vec3(1.0, 0.0, 0.0); // Red
 
 // Define thresholds for color transitions (approx 0.0 -> 1/3 -> 2/3 -> 1.0)
 const float THRESHOLD1 = 1.0 / 3.0;
-const float THRESHOLD2 = 3.0 / 4.0;
+const float THRESHOLD2 = 7.0 / 10.0;
 
 void main()
 {

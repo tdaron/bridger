@@ -62,6 +62,11 @@ double *compute_solution(char *filename, problem **prob, geo **geom, int nTankEd
   // elasticityAddBoundaryCondition(theProblem, "Tank", DIRICHLET_Y, 0.0);
   // elasticityAddBoundaryCondition(theProblem, "Tank", DIRICHLET_Y, 0.0);
 
+
+  // Print max value of B vector
+  // fprintf(stdout, "Max B value: %e\n", vecMax(theProblem->system->B, theProblem->system->size));
+
+
   // elasticityAssembleNeumannExplicit(theProblem, TankEdges, nTankEdges, tankWeight);
 
 
@@ -76,24 +81,7 @@ double *compute_solution(char *filename, problem **prob, geo **geom, int nTankEd
   }
   theSoluce = solution_reorder;
 
-  nodes *theNodes = theGeometry->theNodes;
-  double deformationFactor = 1e5;
-  double *normDisplacement = malloc(theNodes->nNodes * sizeof(double));
-  double *forcesX = malloc(theNodes->nNodes * sizeof(double));
-  double *forcesY = malloc(theNodes->nNodes * sizeof(double));
 
-  for (int i = 0; i < theNodes->nNodes; i++) {
-    theNodes->X[i] += theSoluce[2 * i + 0] * deformationFactor;
-    theNodes->Y[i] += theSoluce[2 * i + 1] * deformationFactor;
-    normDisplacement[i] = sqrt(theSoluce[2 * i + 0] * theSoluce[2 * i + 0] +
-                               theSoluce[2 * i + 1] * theSoluce[2 * i + 1]);
-    // forcesX[i] = theForces[2*i+0];
-    // forcesY[i] = theForces[2*i+1];
-  }
-  double hMin = vecMin(normDisplacement, theNodes->nNodes);
-  double hMax = vecMax(normDisplacement, theNodes->nNodes);
-  printf(" ==== Minimum displacement          : %14.7e [m] \n", hMin);
-  printf(" ==== Maximum displacement          : %14.7e [m] \n", hMax);
 
   return theSoluce;
 }

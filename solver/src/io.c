@@ -113,7 +113,6 @@ int solutiondRead(int allocated_size, double *value, const char *filename) {
       ErrorScan(fscanf(file, "%le,", &value[i * nFields + j]));
     ErrorScan(fscanf(file, "\n"));
   }
-  printf("Reading solution of shape (%d,%d)\n", nNodes, nFields);
   fclose(file);
   return nNodes * nFields;
 }
