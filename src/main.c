@@ -138,11 +138,11 @@ void get_cursor_position(GLFWwindow *window, MeshSettings *s, double *xpos,
 void regen_mesh() {
   freeMesh(gpu_mesh);
   gpu_mesh = generate_mesh(&settings, &scale);
-  free(field);
-  field = compute_field(gpu_mesh, &settings);
+  // free(field);
+  // field = compute_field(gpu_mesh, &settings);
   meshVBO = load_mesh_into_vao(vao, gpu_mesh, meshVBO);
-  fieldVBO =
-      load_field_into_vao(vao, field, gpu_mesh->numTriangles * 3 * 3, fieldVBO);
+  // fieldVBO =
+  //     load_field_into_vao(vao, field, gpu_mesh->numTriangles * 3 * 3, fieldVBO);
   regen_solution();
 }
 
@@ -157,7 +157,6 @@ void regen_solution() {
 }
 
 void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
-  // Left button  &&  pushed
   if (button == 0 && action == 0) {
     double xpos;
     double ypos;
