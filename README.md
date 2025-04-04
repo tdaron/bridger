@@ -76,3 +76,4 @@ Once the simulation is running:
 Shortcuts:
 
 - **Toogle visibility of deformation**: Press `T` to toogle the deformation visibility
+- **Get Tank Position**: Press `E` to get the tank position in stdout
