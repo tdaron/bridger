@@ -27,15 +27,14 @@ Oops. The critical question arises: Can this damaged bridge handle the weight of
 
 This repository contains our code for the LEPL1110 Finite Element Method project. We simulate the structural integrity of a damaged bridge under the load of a tank. It's built primarily in C, featuring a custom FEA solver and OpenGL for visualization.
 
-## Code Structure: Organized Chaos
-
+## Code Structure
 We've structured the code into two main parts:
 
 - **The Main Project (Root Directory)**: Handles mesh generation (using gmsh), rendering the bridge and tank (via glfw, glad, and our own lightweight graphics code found in src/gui), loading assets (stb_image.h), and logging useful (or cryptic) messages (log.c). It depends on the solver library below.
 
 - **The Standalone Solver (solver/ directory)**: Heart of the FEA simulation. It's an independent library, containing our finite-element method implementation. No dependencies here!
 
-## Dependencies: The Necessary Evils
+## Dependencies
 
 We tried to keep things contained:
 
@@ -43,9 +42,8 @@ We tried to keep things contained:
 - **gmsh**: The one major external dependency. CMake should automagically download the SDK for you.
   - Murphy's Law Clause: If https://gmsh.info happens to be down (like it is right now while I'm writing those lines at 2 AM on April 4th), don't worry. It's OK.  You can manually download the SDK and extract it to `gmsh/gmsh-4.13.1-Linux64-sdk` at the project root. CMake should then detect it and let the build proceed. (Fun fact ! You can download the SDK from the Wayback Machine !)
 
-## Getting it Running: Compilation Rituals
+## Getting it Running
 
-Follow the sacred CMake incantations:
 
 To build and run the full bridge simulation project:
 ```bash
