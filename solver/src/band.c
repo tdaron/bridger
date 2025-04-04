@@ -67,6 +67,9 @@ int csr_comp(const void *a, const void *b) {
     return 0; // Important: Return 0 for equal elements
 }
 
+int* to_free_adj_elems = NULL;
+int** to_free_adj = NULL;
+
 int** problemCOO(problem *theProblem) {
     int nElems = theProblem->geometry->theElements->nElem;
     int nLocal = theProblem->geometry->theElements->nLocalNode;
@@ -76,6 +79,9 @@ int** problemCOO(problem *theProblem) {
     int* coo_adj_elems = calloc(2 * num_pairs, sizeof(int));
 
     int** coo_adj = malloc(num_pairs * sizeof(int*));
+
+    to_free_adj = coo_adj;
+    to_free_adj_elems = coo_adj_elems;
 
     int* current_elem_ptr = coo_adj_elems;
     int current_adj_index = 0;
@@ -172,7 +178,10 @@ void rcm(problem* theProblem) {
     int nElem = theProblem->geometry->theElements->nElem;
     int nLocal = theProblem->geometry->theElements->nLocalNode;
 
-    int** csr = csr_from_coo(problemCOO(theProblem), nNodes, nElem, nLocal);
+    int** coo_adj = problemCOO(theProblem);
+    int* coo_adj_elems = coo_adj[0];
+
+    int** csr = csr_from_coo(coo_adj, nNodes, nElem, nLocal);
     int* row_ptr = csr[0];
     int* col_ptr = csr[1];
 
@@ -312,9 +321,12 @@ void rcm(problem* theProblem) {
     //     fprintf(stderr, "%d ", theProblem->renumOld2New[i]);
     // }
 
+
     free(order);
     free(visited);
     free(row_ptr);
     free(col_ptr);
     free(csr);
+    free(to_free_adj_elems);
+    free(to_free_adj);
 }

@@ -295,12 +295,18 @@ problem *elasticityCreate(
 void elasticityFree(problem *theProblem) {
   fullSystemFree(theProblem->system);
   integrationFree(theProblem->rule);
+  integrationFree(theProblem->ruleEdge);
   discreteFree(theProblem->space);
+  discreteFree(theProblem->spaceEdge);
   for (int i = 0; i < theProblem->nBoundaryConditions; i++) {
     free(theProblem->conditions[i]);
   }
   free(theProblem->conditions);
   free(theProblem->constrainedNodes);
+  free(theProblem->soluce);
+  free(theProblem->residuals);
+  free(theProblem->renumOld2New);
+  free(theProblem->renumNew2Old);
   free(theProblem);
 }
 
