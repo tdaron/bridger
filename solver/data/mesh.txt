@@ -4694,7 +4694,7 @@ Number of triangles 2774
   2771 :    891   1540   1505
   2772 :    910   1539   1504
   2773 :    191   1546    190
-Number of domains 7
+Number of domains 6
   Domain :      1
   Name : Pillar1
   Number of elements :     25
@@ -4729,8 +4729,3 @@ Number of domains 7
   Number of elements :     14
    262    263    264    265    266    267    268    269    270    271 
    272    273    274    275 
-  Domain :      7 
-  Name : Tank
-  Number of elements :     12
-   329    330    331    332    333    334    335    336    337    338 
-   339    340 

@@ -96,5 +96,6 @@ unsigned int load_soluce_into_vao(unsigned int VAO, double *soluce,
   glEnableVertexAttribArray(2);
 
   free(field);
+  free(soluce);
   return VBO;
 }

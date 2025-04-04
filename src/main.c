@@ -24,7 +24,7 @@ MeshSettings settings = {.bridgeHeight = .8,
                          .preciseElementSize = 0.1,
                          .precisionRadius = 2,
                          .tankLength = 4,
-                         .tankWeight = 1000,
+                         .tankWeight = 1000000,
                          .tankX = 0};
 
 Mesh *gpu_mesh;
@@ -45,7 +45,6 @@ int main() {
   ss_init();
   gmshInitialize(0, NULL, 1, 0, &ierr);
   printf("GMSH loaded\n");
-
 
   GLFWwindow *window = createWindow(800, 600, "Bridger");
   unsigned int shaderProgram = get_program("src/gui/shaders/vertex.vert",
@@ -90,11 +89,12 @@ void processInput(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
   if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-    tankDx += 0.10;
+    tankDx += 0.01;
+    regen_solution();
   }
   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-    tankDx -= 0.10;
-    
+    tankDx -= 0.01;
+    regen_solution();
   }
   if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS &&
       prevTKeyState == GLFW_RELEASE) {
@@ -129,9 +129,13 @@ void regen_mesh() {
 }
 
 void regen_solution() {
-  double *soluce = compute_solution("solver/data/mesh.txt", NULL, &geometry, 0, NULL, settings.tankWeight);
+
+  int *tankEdges;
+  int nTankEdges;
+  find_tank_edges(gpu_mesh, &tankEdges, &nTankEdges, &settings);
+  double *soluce = compute_solution("solver/data/mesh.txt", NULL, &geometry, nTankEdges,
+                                    tankEdges, settings.tankWeight);
   soluceVBO = load_soluce_into_vao(vao, soluce, geometry, 0, gpu_mesh->scale);
-  
 }
 
 void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
