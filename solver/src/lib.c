@@ -59,11 +59,15 @@ double *compute_solution(char *filename, problem **prob, geo **geom, int nTankEd
   elasticityAddBoundaryCondition(theProblem, "Extremity1", DIRICHLET_Y, 0.0);
   elasticityAddBoundaryCondition(theProblem, "Extremity0", DIRICHLET_Y, 0.0);
 
-  
-  elasticityAssembleNeumannExplicit(theProblem, TankEdges, nTankEdges, tankWeight);
+
+  // Print max value of B vector
+  fprintf(stdout, "Max B value: %e\n", vecMax(theProblem->system->B, theProblem->system->size));
 
 
-  double *theSoluce = elasticitySolve(theProblem, makeBanded);
+  // elasticityAssembleNeumannExplicit(theProblem, TankEdges, nTankEdges, tankWeight);
+
+
+  double *theSoluce = elasticitySolve(theProblem, makeBanded, TankEdges, nTankEdges, tankWeight);
 
   // Reorder Solution
   double *solution_reorder =

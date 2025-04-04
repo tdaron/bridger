@@ -1,7 +1,7 @@
 #include "../include/problem.h"
 #include <stdio.h>
 
-double *elasticitySolve(problem *theProblem, int makeBanded) {
+double *elasticitySolve(problem *theProblem, int makeBanded, int* TankEdges, int nTankEdges, double tankWeight) {
 
     if (makeBanded) {
         bandSystemInit(theProblem->system);
@@ -14,7 +14,8 @@ double *elasticitySolve(problem *theProblem, int makeBanded) {
     } else {
         elasticityAssembleElements(theProblem);
     }
-    elasticityAssembleNeumann(theProblem);
+    // elasticityAssembleNeumann(theProblem);
+    elasticityAssembleNeumannExplicit(theProblem, TankEdges, nTankEdges, tankWeight);
 
     int *theConstrainedNodes = theProblem->constrainedNodes;
     for (int i = 0; i < theProblem->system->size; i++) {

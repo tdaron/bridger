@@ -172,8 +172,7 @@ double *bandSystemEliminate(linearSystem *myBand);
 double *bandSystemCholesky(linearSystem *myBand);
 
 double * elasticityForces(problem *theProblem);
-double *elasticitySolve(problem *theProblem, int makeBanded);
-
+double *elasticitySolve(problem *theProblem, int makeBanded, int* TankEdges, int nTankEdges, double tankWeight);
 // Renumbering related functions
 void problemXRenumber(problem *theProblem);
 void rcm(problem* theProblem);
