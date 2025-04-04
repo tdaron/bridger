@@ -25,7 +25,7 @@ MeshSettings settings = {.bridgeHeight = .8,
                          .precisionRadius = 2,
                          .tankLength = 4,
                          .tankWeight = -100000,
-                         .tankX = 0};
+                         .tankX = 0.526316};
 
 Mesh *gpu_mesh;
 unsigned int vao;
@@ -135,6 +135,9 @@ void regen_solution() {
   int *tankEdges;
   int nTankEdges;
   find_tank_edges(gpu_mesh, &tankEdges, &nTankEdges, &settings);
+  for (int i = 0; i < nTankEdges; i++) {
+    printf("Tank edge: %d\n", tankEdges[i]);
+  }
   double *soluce = compute_solution("solver/data/mesh.txt", NULL, &geometry, nTankEdges,
                                     tankEdges, settings.tankWeight);
   soluceVBO = load_soluce_into_vao(vao, soluce, geometry, 0, gpu_mesh->scale);
