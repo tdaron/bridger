@@ -292,9 +292,8 @@ class Mesh:
 
         return next_domain_id, next_domain_id + len(pillars) + 2
 
-    def visualize_domain(self, domain_idx, title=None):
+    def visualize_domain(self, domain_idx, fig, ax, title=None):
         """Visualize a specific domain"""
-        fig, ax = plt.subplots(figsize=(10, 8))
 
         # Draw all edges lightly
         lines = []
@@ -317,15 +316,15 @@ class Mesh:
             lc2 = LineCollection(domain_lines, colors='red', linewidths=2)
             ax.add_collection(lc2)
 
-            if title:
-                ax.set_title(f"{title}: {domain.name}")
-            else:
-                ax.set_title(f"Domain {domain_idx}: {domain.name}")
+            # if title:
+                # ax.set_title(f"{title}: {domain.name}")
+            # else:
+                # ax.set_title(f"Domain {domain_idx}: {domain.name}")
 
-        ax.set_aspect('equal')
-        plt.autoscale()
-        plt.tight_layout()
-        plt.show()
+        # ax.set_aspect('equal')
+        # plt.autoscale()
+        # plt.tight_layout()
+        # plt.show()
 
 def main():
     if len(sys.argv) < 3:
@@ -345,9 +344,11 @@ def main():
     print(f"Added {end_idx - start_idx} new domains for boundary conditions")
 
     # Visualize the domains
-    # for i in range(start_idx, end_idx):
-    #     if i < len(mesh.domains):
-    #         mesh.visualize_domain(i, "New Boundary Domain")
+    fig, ax = plt.subplots(figsize=(10, 8))
+    for i in range(start_idx, end_idx):
+        if i < len(mesh.domains):
+            mesh.visualize_domain(i, fig, ax, "New Boundary Domain")
+    plt.show()
 
     # Save the updated mesh
     mesh.write_to_file(output_file)
