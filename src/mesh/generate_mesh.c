@@ -90,8 +90,8 @@ void find_tank_edges(Mesh *mesh, int **tankEdges, int *ntankEdges,
   size_t nNode = mesh->nNode;
   printf("n nodes: %ld\n", nNode);
   size_t nEdge = mesh->nEdge;
-  size_t* edgeNode = mesh->edgeNode;
-  double* xyz = mesh->xyz;
+  size_t *edgeNode = mesh->edgeNode;
+  double *xyz = mesh->xyz;
   // Find max Y coordinate
   for (size_t i = 0; i < nNode; i++) {
     if (xyz[3 * i + 1] > maxY)
@@ -263,7 +263,7 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
   // Write nodes to file
   fprintf(file, "Number of nodes %zu \n", nNode);
   for (int i = 0; i < nNode; i++) {
-    fprintf(file, "%6d : %14.7e %14.7e\n", i + 1, xyz[3 * node[i] - 3],
+    fprintf(file, "%6d : %14.7e %14.7e\n", i, xyz[3 * node[i] - 3],
             xyz[3 * node[i] - 2]);
   }
 
@@ -303,7 +303,8 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
   }
 
   // Write domains to file
-  int totalDomains = global_s->pillarsNumber + 2; // Number of pillars + 2 extremities
+  int totalDomains =
+      global_s->pillarsNumber + 2 + 1; // Number of pillars + 2 extremities
   fprintf(file, "Number of domains %d\n", totalDomains);
 
   // Write pillar domains
@@ -336,7 +337,6 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
     free(extremityEdges[i]);
   }
 
-  fclose(file);
   free(pillarEdges);
   free(extremityEdges);
   free(nPillarEdges);
@@ -364,6 +364,22 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
       }
     }
   }
+
+  // Write tank domain
+
+  int *tankEdges;
+  int nTankEdges;
+  find_tank_edges(mesh, &tankEdges, &nTankEdges, global_s);
+  fprintf(file, "  Domain : %6d \n", global_s->pillarsNumber + 2 + 1);
+  fprintf(file, "  Name : Tank\n");
+  fprintf(file, "  Number of elements : %6u\n", nTankEdges);
+  for (int j = 0; j < nTankEdges; j++) {
+    fprintf(file, "%6d ", tankEdges[j]);
+    if ((j + 1) % 10 == 0) {
+      fprintf(file, "\n");
+    }
+  }
+  fclose(file);
 
   log_warn("BEFORE SCALE: %d is (%f,%f,%f)", node[0] - 1, mesh->vertexArray[0],
            mesh->vertexArray[1], mesh->vertexArray[2]);
