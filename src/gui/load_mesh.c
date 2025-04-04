@@ -66,7 +66,6 @@ unsigned int load_soluce_into_vao(unsigned int VAO, double *soluce,
   size_t size = geometry->theElements->nElem * 3 *
                 2; // each triangle is 3 nodes 2 dimensions
   double *field = malloc(sizeof(double) * size);
-  log_info("Loading soluce !!");
   for (size_t i = 0; i < geometry->theElements->nElem; i++) {
     // For each triangle
     for (size_t j = 0; j < 3; j++) {

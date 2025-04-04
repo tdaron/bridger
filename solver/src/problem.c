@@ -282,7 +282,7 @@ problem *elasticityCreate(
   // We'll also include the diagonal in the bandwidth.
   int bandwidth = 2 * max + 1;
 
-  fprintf(stderr, "Bandwidth: %d\n", bandwidth);
+  // fprintf(stderr, "Bandwidth: %d\n", bandwidth);
 
   if (makeBanded)
     theProblem->system = bandSystemCreate(size, bandwidth);

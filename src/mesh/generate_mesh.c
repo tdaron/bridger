@@ -88,7 +88,6 @@ void find_tank_edges(Mesh *mesh, int **tankEdges, int *ntankEdges,
                      MeshSettings *s) {
   double maxY = -1e12;
   size_t nNode = mesh->nNode;
-  printf("n nodes: %ld\n", nNode);
   size_t nEdge = mesh->nEdge;
   size_t *edgeNode = mesh->edgeNode;
   double *xyz = mesh->xyz;
@@ -381,8 +380,6 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
   }
   fclose(file);
 
-  log_warn("BEFORE SCALE: %d is (%f,%f,%f)", node[0] - 1, mesh->vertexArray[0],
-           mesh->vertexArray[1], mesh->vertexArray[2]);
 
   gmshFree(edgeElem);
   // gmshFree(edgeNode);

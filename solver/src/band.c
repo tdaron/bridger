@@ -134,9 +134,9 @@ int** csr_from_coo(int **coo_adj, int nNodes, int nElems, int nLocal) {
         row_ptr[j] = nElems * nLocal * nLocal - skipped;
     }
     // Print size of col_ind and row_ptr and nNodes
-    fprintf(stderr, "Size of col_ind : %d\n", nElems * nLocal * nLocal - skipped);
-    fprintf(stderr, "Size of row_ptr : %d\n", nNodes + 1);
-    fprintf(stderr, "nNodes : %d\n", nNodes);
+    // fprintf(stderr, "Size of col_ind : %d\n", nElems * nLocal * nLocal - skipped);
+    // fprintf(stderr, "Size of row_ptr : %d\n", nNodes + 1);
+    // fprintf(stderr, "nNodes : %d\n", nNodes);
 
     int** csr = malloc(2 * sizeof(int*));
     *csr = row_ptr;

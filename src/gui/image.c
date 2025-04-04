@@ -69,7 +69,6 @@ void DrawImage(char *path, float x, float y, float scale) {
   int width, height, nrChannels;
   stbi_set_flip_vertically_on_load(1);
   unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
-  printf("Loaded image. Width: %d Height: %d\n", width, height);
 
   unsigned int texture;
   glGenTextures(1, &texture);
