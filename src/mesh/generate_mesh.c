@@ -339,6 +339,7 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
   free(pillarEdges);
   free(extremityEdges);
   free(nPillarEdges);
+  free(nExtremityEdges);
 
   // Create and return the mesh
   Mesh *mesh = malloc(sizeof(Mesh));
@@ -379,11 +380,10 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
     }
   }
   fclose(file);
+  free(tankEdges);
 
 
   gmshFree(edgeElem);
-  // gmshFree(edgeNode);
-  // gmshFree(xyz);
   gmshFree(trash);
   gmshFree(node);
   gmshFree(elem);
