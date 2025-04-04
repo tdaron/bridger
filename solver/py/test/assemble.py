@@ -5,8 +5,6 @@ from typing import Tuple, List
 
 from boundary import apply_dirichlet_bc, apply_dirichlet_bc_sym_banded
 
-god_damn = np.zeros((1, 1), dtype=np.float64)
-
 def assemble_system(problem) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
     n_points = problem.n_points
     n_elems  = problem.n_elements
@@ -91,10 +89,7 @@ def assemble_system(problem) -> Tuple[NDArray[np.float64], NDArray[np.float64]]:
                 B_global[i_dof_y] -= (rho * g * phi[i_loc] * weight * J_e)
 
     # Count and print the number of non-zero elements in the global matrix within a tolerance
-    print("Number of non-zero elements in the global matrix: ", np.count_nonzero(A_global > 1e-6))
-
-    global god_damn
-    god_damn = A_global.copy()
+    print("Number of non-zero elements in the global matrix: ", np.count_nonzero(abs(A_global) > 1e-6))
 
     # Apply Dirichlet BCs
     for bc in problem.conditions:
@@ -244,7 +239,8 @@ def assemble_csr_system(problem):
     g = 9.81
 
     # A_global = np.zeros((n_dof, n_dof), dtype=np.float64)
-    coo_global = np.zeros((n_elems * n_local * n_local * 4, 3), dtype=np.int64)
+    # coo_global = np.zeros((n_elems * n_local * n_local * 4, 3), dtype=np.int64)
+    , coo_vals = np.zeros((n_elems * n_local * n_local * 4, 2), dtype=np.int64)
     coo_vals = np.zeros((n_elems * n_local * n_local * 4), dtype=np.float64)
     B_global = np.zeros(n_dof, dtype=np.float64)
 
@@ -310,33 +306,33 @@ def assemble_csr_system(problem):
                     val_yx = (c * dphidx[i_loc] * dphidy[j_loc] + b * dphidy[i_loc] * dphidx[j_loc]) * weight * J_e
                     val_yy = (c * dphidx[i_loc] * dphidx[j_loc] + a * dphidy[i_loc] * dphidy[j_loc]) * weight * J_e
 
-                    # if abs(val_xx) > 1e-12:
-                    coo_global[nnz + local_nnz, 0] = i_dof_x
-                    coo_global[nnz + local_nnz, 1] = j_dof_x
-                    coo_global[nnz + local_nnz, 2] = val_xx
-                    coo_vals[nnz + local_nnz] += val_xx
-                    local_nnz += 1
+                    if abs(val_xx) > 1e-12:
+                        coo_global[nnz + local_nnz, 0] = i_dof_x
+                        coo_global[nnz + local_nnz, 1] = j_dof_x
+                        # coo_global[nnz + local_nnz, 2] = val_xx
+                        coo_vals[nnz + local_nnz] = val_xx
+                        local_nnz += 1
 
-                    # if abs(val_xy) > 1e-12:
-                    coo_global[nnz + local_nnz, 0] = i_dof_x
-                    coo_global[nnz + local_nnz, 1] = j_dof_y
-                    coo_global[nnz + local_nnz, 2] = val_xy
-                    coo_vals[nnz + local_nnz] += val_xy
-                    local_nnz += 1
+                    if abs(val_xy) > 1e-12:
+                        coo_global[nnz + local_nnz, 0] = i_dof_x
+                        coo_global[nnz + local_nnz, 1] = j_dof_y
+                        # coo_global[nnz + local_nnz, 2] = val_xy
+                        coo_vals[nnz + local_nnz] = val_xy
+                        local_nnz += 1
 
-                    # if abs(val_yx) > 1e-12:
-                    coo_global[nnz + local_nnz, 0] = i_dof_y
-                    coo_global[nnz + local_nnz, 1] = j_dof_x
-                    coo_global[nnz + local_nnz, 2] = val_yx
-                    coo_vals[nnz + local_nnz] += val_yx
-                    local_nnz += 1
+                    if abs(val_yx) > 1e-12:
+                        coo_global[nnz + local_nnz, 0] = i_dof_y
+                        coo_global[nnz + local_nnz, 1] = j_dof_x
+                        # coo_global[nnz + local_nnz, 2] = val_yx
+                        coo_vals[nnz + local_nnz] = val_yx
+                        local_nnz += 1
 
-                    # if abs(val_yy) > 1e-12:
-                    coo_global[nnz + local_nnz, 0] = i_dof_y
-                    coo_global[nnz + local_nnz, 1] = j_dof_y
-                    coo_global[nnz + local_nnz, 2] = val_yy
-                    coo_vals[nnz + local_nnz] += val_yy
-                    local_nnz += 1
+                    if abs(val_yy) > 1e-12:
+                        coo_global[nnz + local_nnz, 0] = i_dof_y
+                        coo_global[nnz + local_nnz, 1] = j_dof_y
+                        # coo_global[nnz + local_nnz, 2] = val_yy
+                        coo_vals[nnz + local_nnz] = val_yy
+                        local_nnz += 1
                 B_global[i_dof_x] += 0.0
                 B_global[i_dof_y] -= (rho * g * phi[i_loc] * weight * J_e)
         nnz += local_nnz
@@ -346,15 +342,8 @@ def assemble_csr_system(problem):
     # print(coo_global[-300:, :])
 
     # To sort by first column, then second column
-    sort_indices = np.lexsort((coo_global[:,1], coo_global[:,0]))
-
-    # Apply the same sort indices to both arrays
-    coo_global = coo_global[sort_indices]
-    coo_vals = coo_vals[sort_indices]
-
-    # Compare third column of coo_global to coo_vals
-    # assert np.allclose(coo_global[:, 2], coo_vals), "COO values do not match"
-
+    coo_global = coo_global[np.lexsort((coo_global[:,1], coo_global[:,0]))]
+    coo_vals = coo_vals[np.lexsort((coo_global[:,1], coo_global[:,0]))]
     # print(coo_global[-300:, :])
 
     # Extract CSR using Scipy
@@ -365,24 +354,16 @@ def assemble_csr_system(problem):
     # Convert to CSR format
     col_index, row_index, values = csr_from_coo(coo_global, nnz, n_points)
     print("CSR STUFF", len(col_index), len(row_index), len(values))
-    print(np.count_nonzero(values > 1e-12))
+    print(np.count_nonzero(abs(values) > 1e-12))
     col_index, row_index, values = csr_from_coo2(coo_global, coo_vals, nnz, n_points)
     print("CSR STUFF", len(col_index), len(row_index), len(values))
-    print(np.count_nonzero(values > 1e-12))
+    print(np.count_nonzero(abs(values) > 1e-12))
 
     A = np.zeros((n_dof, n_dof), dtype=np.float64)
     for i in range(len(row_index) - 1):
         for j in range(row_index[i], row_index[i + 1]):
             A[i, col_index[j]] = values[j]
     coo_global = A
-
-    # Compare coo_global to god_damn
-    print("COO Global")
-    print(coo_global[:10, :10])
-    print("God Damn")
-    print(god_damn[:10, :10])
-
-
 
     # Compare to scipy
 
@@ -397,7 +378,6 @@ def assemble_csr_system(problem):
     # print("Scipy CSR Test Passed")
 
     # exit(1)
-    # coo_global = csr.toarray().astype(np.float64)
 
     # Apply Dirichlet BCs
     for bc in problem.conditions:
@@ -437,8 +417,8 @@ def csr_from_coo2(coo_adj: NDArray, coo_vals, nnz: int, n_points: int) -> tuple:
         # Skip duplicates
         # if prev == coo_adj[i][:2]:
         if np.array_equal(prev, coo_adj[i][:2]):
-            # values[nnz_new - 1] += coo_adj[i][2]
-            values[nnz_new - 1] += coo_vals[i]
+            # values[nnz_new] += coo_adj[i][2]
+            values[nnz_new] += coo_vals[i]
             continue
         # col_index.append(coo_adj[i][1])
         col_index[nnz_new] = coo_adj[i][1]

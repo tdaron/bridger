@@ -29,7 +29,7 @@ def extract_full_from_sym_banded(A, n, band):
 
 def main():
     # problem = read_mesh("./data/elasticity.txt")
-    problem = read_mesh("./data/mesh666.txt")
+    problem = read_mesh("./data/mensh.txt")
 
     E = 211.e9
     nu = 0.3
@@ -61,11 +61,37 @@ def main():
     # add_boundary_condition(problem, right, "DIRICHLET_X", 0.0)
 
 
-    symmetry = [i for i in problem.domains if i.name == "Symmetry"][0]
-    bottom = [i for i in problem.domains if i.name == "Bottom"][0]
+    # symmetry = [i for i in problem.domains if i.name == "Symmetry"][0]
+    # bottom = [i for i in problem.domains if i.name == "Bottom"][0]
 
-    add_boundary_condition(problem, symmetry, "DIRICHLET_X", 0.0)
-    add_boundary_condition(problem, bottom, "DIRICHLET_Y", 0.0)
+    # add_boundary_condition(problem, symmetry, "DIRICHLET_X", 0.0)
+    # add_boundary_condition(problem, bottom, "DIRICHLET_Y", 0.0)
+
+
+    pillar1 = [i for i in problem.domains if i.name == "Pillar1"][0]
+    pillar2 = [i for i in problem.domains if i.name == "Pillar2"][0]
+    pillar3 = [i for i in problem.domains if i.name == "Pillar3"][0]
+    pillar4 = [i for i in problem.domains if i.name == "Pillar4"][0]
+
+    left = [i for i in problem.domains if i.name == "Extremity0"][0]
+    right = [i for i in problem.domains if i.name == "Extremity1"][0]
+
+    add_boundary_condition(problem, pillar1, "DIRICHLET_Y", 0.0)
+    add_boundary_condition(problem, pillar2, "DIRICHLET_Y", 0.0)
+    add_boundary_condition(problem, pillar3, "DIRICHLET_Y", 0.0)
+    add_boundary_condition(problem, pillar4, "DIRICHLET_Y", 0.0)
+
+    add_boundary_condition(problem, pillar1, "DIRICHLET_X", 0.0)
+    add_boundary_condition(problem, pillar2, "DIRICHLET_X", 0.0)
+    add_boundary_condition(problem, pillar3, "DIRICHLET_X", 0.0)
+    add_boundary_condition(problem, pillar4, "DIRICHLET_X", 0.0)
+
+    add_boundary_condition(problem, left, "DIRICHLET_X", 0.0)
+    add_boundary_condition(problem, right, "DIRICHLET_X", 0.0)
+
+    add_boundary_condition(problem, left, "DIRICHLET_Y", 0.0)
+    add_boundary_condition(problem, right, "DIRICHLET_Y", 0.0)
+
 
 
     # RCM renumbering
@@ -85,7 +111,7 @@ def main():
     problem.bandwidth = 2 * dist + 1
     print(problem.bandwidth)
 
-    # A, B = assemble_system(problem)
+    A, B = assemble_system(problem)
     # exit(1)
     A, B = assemble_csr_system(problem)
 
@@ -110,7 +136,7 @@ def main():
     # solution = sym_band_cholesky(A, B, np.zeros_like(B), problem.bandwidth)
     # solution = np_solve(A, B)
     # Calculte condition number
-    print(f"Condition number: {np.linalg.cond(A)}")
+    # print(f"Condition number: {np.linalg.cond(A)}")
     # Condition number with jacobi preconditioning
     # print(f"Condition number: {np.linalg.cond(A @ np.diag(1 / np.diag(A)))}")
     # Calculte incomplete cholesky preconditioner
@@ -120,11 +146,12 @@ def main():
     # print(f"Condition number: {np.linalg.cond(np.linalg.inv(L @ L.T) @ A)}")
     # exit(1)
 
-    solution = pre_c_grad_full(A, B, np.ones_like(B), 1e-12)
+    solution = np_solve(A, B)
+    # solution = pre_c_grad_full(A, B, np.ones_like(B), 1e-12)
     # solution = c_grad_full(A, B, np.zeros_like(B), 1e-6)
     # ret = scipy.sparse.linalg.cg(A, B, x0=np.zeros_like(B), rtol=1e-6)
     # print(ret[1])
-    solution = scipy.sparse.linalg.cg(A, B, x0=np.zeros_like(B), rtol=1e-6)[0]
+    # solution = scipy.sparse.linalg.cg(A, B, x0=np.zeros_like(B), rtol=1e-6)[0]
 
     t1 = time.time()
     print(f"Time: {t1 - t0}")
@@ -133,6 +160,7 @@ def main():
     for i in range(len(solution)):
         solution_reordered[2 * problem.order[i // 2] + i % 2] = solution[i]
     solution = solution_reordered
+
 
     plot_point_cloud_displacement(problem, solution, deformation_factor=1e5)
     # plot_point_cloud_displacement(problem, solution, deformation_factor=5e3)
