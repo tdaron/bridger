@@ -25,10 +25,10 @@ MeshSettings settings = {.bridgeHeight = .8,
                          .precisionRadius = 2,
                          .tankLength = 4,
                          .tankWeight = -100000,
-                         .tankX = 0.526316,
+                         .tankX = 0,
                          .holeRadius = 0.40
 
-                       };
+};
 
 Mesh *gpu_mesh;
 unsigned int vao;
@@ -38,7 +38,7 @@ unsigned int meshVBO;
 unsigned int fieldVBO;
 unsigned int soluceVBO;
 int windowWidth, windowHeight;
-float tankDx = 0;
+float tankDx = -0.95;
 geo *geometry;
 
 int seeDisformation = 1.0;
@@ -57,7 +57,7 @@ int main() {
 
   vao = create_vao();
   regen_mesh();
-  settings.tankX = ((-0.9 + tankDx) / scale) + gpu_mesh->centers[0];
+  settings.tankX = ((tankDx) / scale) + gpu_mesh->centers[0];
   regen_solution();
 
   glfwSetMouseButtonCallback(window, mouse_callback);
@@ -78,10 +78,10 @@ int main() {
     glUniform1i(seeDisformationUniform, seeDisformation);
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, gpu_mesh->numTriangles * 3);
-    DrawImage("assets/tank.png", -0.9 + tankDx, 0.2, 0.8);
+    DrawImage("assets/tank.png", tankDx, 0.2, 0.8);
     glfwGetWindowSize(window, &windowWidth, &windowHeight);
     glfwSwapBuffers(window);
-    settings.tankX = ((-0.9 + tankDx) / scale) + gpu_mesh->centers[0];
+    settings.tankX = ((tankDx) / scale) + gpu_mesh->centers[0];
     glfwPollEvents();
     // glfwGetCursorPos(window, &xpos, &ypos);
     // printf("%f %f\n", xpos, ypos );
@@ -92,16 +92,26 @@ int main() {
 }
 
 static int prevTKeyState = GLFW_RELEASE; // Store previous state of T key
+static int prevEKeyState = GLFW_RELEASE; // Store previous state of E key
 void processInput(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
   if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-    tankDx += 0.01;
+    if (settings.tankX <= 16) {
+      tankDx += 0.01;
+    }
     regen_solution();
   }
   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-    tankDx -= 0.01;
+    if (settings.tankX >= 0.02) {
+      tankDx -= 0.01;
+    }
     regen_solution();
+  }
+  if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS &&
+      prevEKeyState == GLFW_RELEASE) {
+    log_info("Tank position: %f - %f%", settings.tankX,
+             settings.tankX / settings.bridgeWidth);
   }
   if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS &&
       prevTKeyState == GLFW_RELEASE) {
@@ -109,6 +119,7 @@ void processInput(GLFWwindow *window) {
   }
 
   prevTKeyState = glfwGetKey(window, GLFW_KEY_T); // Update previous state
+  prevEKeyState = glfwGetKey(window, GLFW_KEY_E); // Update previous state
 }
 
 void get_cursor_position(GLFWwindow *window, MeshSettings *s, double *xpos,
