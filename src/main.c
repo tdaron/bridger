@@ -145,13 +145,13 @@ void regen_solution() {
 void mouse_callback(GLFWwindow *window, int button, int action, int mods) {
   // Left button  &&  pushed
   if (button == 0 && action == 0) {
-    // double xpos;
-    // double ypos;
-    // get_cursor_position(window, &settings, &xpos, &ypos);
-    // settings.holeX = dn(xpos, gpu_mesh, 0);
-    // settings.holeY = dn(ypos, gpu_mesh, 1);
-    // printf("Adding hole at %f %f\n", dn(xpos, gpu_mesh, 0),
-    //        dn(ypos, gpu_mesh, 1));
+    double xpos;
+    double ypos;
+    get_cursor_position(window, &settings, &xpos, &ypos);
+    settings.holeX = dn(xpos, gpu_mesh, 0);
+    settings.holeY = dn(ypos, gpu_mesh, 1);
+    printf("Adding hole at %f %f\n", dn(xpos, gpu_mesh, 0),
+           dn(ypos, gpu_mesh, 1));
     regen_mesh();
     glfwPostEmptyEvent();
   }
