@@ -49,26 +49,26 @@ int main() {
   gmshInitialize(0, NULL, 1, 0, &ierr);
   gmshOptionSetNumber("General.Terminal", 0, NULL);
   gmshOptionSetNumber("General.Verbosity", 0, NULL);
-  printf("GMSH loaded\n");
+  log_info("GMSH loaded");
 
   GLFWwindow *window = createWindow(800, 600, "Bridger");
   unsigned int shaderProgram = get_program("src/gui/shaders/vertex.vert",
                                            "src/gui/shaders/fragment.frag");
 
+  log_info("Window created");
   vao = create_vao();
   regen_mesh();
   settings.tankX = ((tankDx) / scale) + gpu_mesh->centers[0];
   regen_solution();
+  log_info("Initial mesh setup done");
 
   glfwSetMouseButtonCallback(window, mouse_callback);
 
-  time_t old = time(NULL);
 
   unsigned int seeDisformationUniform =
       glGetUniformLocation(shaderProgram, "seeDisformation");
 
   while (!glfwWindowShouldClose(window)) {
-    time_t new = time(NULL);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     processInput(window);
 
@@ -154,6 +154,7 @@ void regen_solution() {
   double *soluce = compute_solution("solver/data/mesh.txt", NULL, &geometry,
                                     nTankEdges, tankEdges, settings.tankWeight);
   soluceVBO = load_soluce_into_vao(vao, soluce, geometry, 0, gpu_mesh->scale);
+  free(tankEdges);
 }
 
 void mouse_callback(GLFWwindow *window, int button, int action, int mods) {

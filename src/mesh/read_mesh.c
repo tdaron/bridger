@@ -3,6 +3,7 @@
 #include <string.h>
 #include <float.h>
 #include <log.h>
+#include "gmshc.h"
 #include "mesh.h"
 
 Mesh* readMesh(const char* filename) {
@@ -207,5 +208,7 @@ void freeMesh(Mesh* mesh) {
     if (mesh) {
         if (mesh->vertexArray) free(mesh->vertexArray);
         free(mesh);
+        gmshFree(mesh->xyz);
+        gmshFree(mesh->edgeNode);
     }
 }
