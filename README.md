@@ -1,63 +1,87 @@
-# LEPL1110 - Projet d'éléments finis
+# LEPL1110 - Finite Element Project: Bridge vs. Tank
 
 <a href="https://forthebadge.com"><img src="https://forthebadge.com/images/badges/made-with-c.svg" alt="Made with C"></a>
 <a href="https://forthebadge.com"><img src="https://forthebadge.com/images/badges/contains-tasty-spaghetti-code.svg" alt="Contains Tasty Spaghetti Code"></a>
 <a href="https://forthebadge.com"><img src="https://forthebadge.com/images/badges/built-with-love.svg" alt="Built With Love"></a>
 <a href="https://forthebadge.com"><img src="https://forthebadge.com/images/badges/60-percent-of-the-time-works-every-time.svg" alt="60% of the time, works every time"></a>
 
-## Un peu de contexte...
+## The Saga of Yevgeny's Bridge Problem...
 
-Yeyvegeny, soucieux de détruire au maximum l’infrastructure du pays qu’il envahit, utilise un pont à
-poutres qui traverse le Dniepr comme cible d’entrainement pour son char de combat T-80. Étant un
-artilleur expérimenté, Yevgeny touche la poutre centrale en plein milieu avec un obus 125mm
-explosif et, à sa surprise, malgré l’effondrement de la poutre centrale, le pont tient bon. Avant de
-pouvoir tirer une seconde fois il reçoit un ordre de son lieutenant : ils doivent traverser le fleuve et
-attaquer le village le plus proche. Oups! Le pont, dans son état endommagé, pourra-t-il supporter le
-poids du char de Yeyvgeny?
+Meet Yevgeny. Yevgeny has a T-80 battle tank and a penchant for, let's say, energetic infrastructure testing. While using a certain beam bridge over the Dnieper for target practice, his expert marksmanship (with a 125mm explosive shell, no less) takes out the central beam. Boom.
 
-## Table of contents
+To his surprise, the bridge, though wounded, defiantly remains standing. Before Yevgeny can deliver a coup de grâce, his lieutenant radios in: "Forget the fireworks, Yevgeny, we need to cross that river and visit the next village!"
 
-- [Code Structure](#code-structure)
+Oops. The critical question arises: Can this spectacularly damaged bridge handle the hefty weight of Yevgeny's T-80? That's what this project aims to find out (through the magic of finite element analysis, of course!).
 
-## Code structure
+## Table of Contents
 
-The code is divided into two parts. The project is the repository as a whole, but inside
-the `solver` directory you will find a independant library containing a finite-element method solver implemented from scratch without any dependencies.
-On the other-hand, the project depends on `gmsh` to generate meshes, as well as `glfw` and `glad` to render them using OpenGL 3.3 standard. We are also using ultra-lightweight libs such as `log` and `stb_image.h` to respectively..log and load images from png files.
+- The Saga of Yevgeny's Bridge Problem...
+- Project Overview
+- Code Structure: Organized Chaos
+- Dependencies: The Necessary Evils
+- Getting it Running: Compilation Rituals
+- How to (Try to) Cross the Bridge: Usage
+- Future Dreams & Known Quirks
 
-All dependencies are vendored, excepted gmsh. However, CMake should download it automagically for you :D
-If, just like us at the time of writing this paragraph (4 of April, 2am) the gmsh website is down for no reason and you are stuck, it's ok. don't worry. it's still doable using good old way. Simply extract gmsh sdk into `gmsh/gmsh-4.13.1-Linux64-sdk` at the root of the project, and cmake should detect it and let you continue grading this project :-) (oh and btw you can download the gmsh sdk from the Wayback Machine, nice to know)
+## Project Overview
 
-To talk a little bit about the code structure, we decided to re-implement a lightweight graphic library using latest OpenGL specs, and its code can be found inside `src/gui` folder.
+This repository contains our code for the LEPL1110 Finite Element Method project. We simulate the structural integrity of a damaged bridge under the load of a tank. It's built primarily in C, featuring a custom FEA solver and OpenGL for visualization.
 
-All the mesh generation stuff can be found inside `src/mesh`, as well as some legacy code used to parse txt mesh files. TODO: clean this up if we do have time. If you can see this text written here, then we didn't.
+## Code Structure: Organized Chaos
 
-## Compilation
+We've structured the code into two main parts:
 
-To run the project, it's the standard cmake procedure:
+- **The Main Project (Root Directory)**: This is the whole shebang. It handles mesh generation (using gmsh), rendering the bridge and tank (via glfw, glad, and our own lightweight graphics code found in src/gui), loading assets (stb_image.h), and logging useful (or cryptic) messages (log.c). It depends on the solver library below.
 
-    mkdir build
-    cmake -B build
-    make -C build
-    ./build/bridge
-    
-WARNING: The code **MUST** be run from the root of the project, as it will try to load files such as shaders or assets by relative path. If you try running from build folder, then it should not work. ̣̣~And if it does work, then you're a wizard, Harry.~
+- **The Standalone Solver (solver/ directory)**: Nestled inside the solver directory is the heart of the FEA simulation. It's an independent library, crafted from scratch with C, containing our finite-element method implementation. Not any dependencies here!
 
-However, if you just want to build the solver, then let's meet inside the `solver` directory.
-Then it's pretty much the same steps:
+## Dependencies: The Necessary Evils
 
-    mkdir build
-    cmake -B build
-    make -C build
-    ./build/solver-bin
+We tried to keep things contained:
 
-A static library will also be created, named `build/libsolver.a`.
+- **Vendored**: Most minor dependencies (glfw, glad, log.c, stb_image.h) are included directly in the repository for your convenience.
+- **gmsh**: The one major external dependency. CMake should automagically download the SDK for you.
+  - Murphy's Law Clause: If https://gmsh.info happens to be down (like it is right now while I'm writing those lines at 2 AM on April 4th), don't worry. It's OK.  You can manually download the SDK and extract it to `gmsh/gmsh-4.13.1-Linux64-sdk` at the project root. CMake should then detect it and let the build proceed. (Fun fact ! You can download the SDK from the Wayback Machine !)
 
-## Usage
+## Getting it Running: Compilation Rituals
 
-The usage is relatively simple. You can use arrow keys to move the **tank** around the bridge. And with your mouse, you can simulate a canon, shooting at the bridge.
+Follow the sacred CMake incantations:
 
-Some shortcuts are also implemented such as:
+To build and run the full bridge simulation project:
+```bash
+mkdir build
+cmake -B build
+make -C build
+./build/bridge
+```
+⚠️ WARNING: You MUST run the bridge executable from the root directory of the project (the one containing this README). It needs to find shaders and assets via relative paths. Running it from the build directory will likely result in sadness, crashes, or summoning unintended demons. (If it does work from the build directory... well, you're a wizard, Harry.)
 
-TODO: make some shortcuts. plz god give us more time.
+To build only the standalone solver library:
+```bash
+cd solver
+mkdir build
+cmake -B build
+make -C build
+./build/solver-bin
+```
+This will also create a static library solver/build/libsolver.a if you wish to link against it elsewhere.
 
+## How to (Try to) Cross the Bridge: Usage
+
+Once the simulation is running:
+
+- **Tank Movement**: Use the Arrow Keys to carefully drive Yevgeny's tank across the bridge. Pray the bridge holds up!
+- **Target Practice**: Use your Mouse to aim and click to simulate firing the cannon. See the stress distributions change in real-time !
+
+Shortcuts:
+
+- We had grand plans for implementing helpful shortcuts.
+- TODO: Actually implement some shortcuts. Please, benevolent spirit of project deadlines, grant us more time! (If you're reading this, the spirit was probably busy elsewhere.)
+
+## Future Dreams & Known Quirks
+
+- Clean up the legacy mesh code in src/mesh.
+- Implement those elusive shortcuts.
+- Maybe add more tanks? Or different types of bridges? (Scope creep, hello!)
+
+Enjoy exploring the precarious situation of Yevgeny and his bridge! We hope you (and the grader!) appreciate the simulation and the character of the code.
