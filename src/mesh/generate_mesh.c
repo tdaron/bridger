@@ -83,83 +83,122 @@ double meshSize(int dim, int tag, double x, double y, double z, double lc,
   return getSize(x, y, global_s);
 }
 
-void find_pillars_and_extremities(double *xyz, size_t nNode, size_t *edgeNode,
-                                  size_t nEdge, int ***pillarEdges,
-                                  int **nPillarEdges, int ***extremityEdges,
-                                  int **nExtremityEdges, MeshSettings *s) {
-  double minY = 1e12;
-  double maxY = -1e12;
-  double minX = 1e12;
-  double maxX = -1e12;
 
-  // Find min and max Y coordinates
-  for (size_t i = 0; i < nNode; i++) {
-    if (xyz[3 * i + 1] < minY)
-      minY = xyz[3 * i + 1];
-    if (xyz[3 * i + 1] > maxY)
-      maxY = xyz[3 * i + 1];
-  }
 
-  // Find min and max X coordinates
-  for (size_t i = 0; i < nNode; i++) {
-    if (xyz[3 * i] < minX)
-      minX = xyz[3 * i];
-    if (xyz[3 * i] > maxX)
-      maxX = xyz[3 * i];
-  }
 
-  // Identify pillar edges and extremity edges
-  *pillarEdges = malloc(s->pillarsNumber * sizeof(int *));
-  *nPillarEdges = malloc(s->pillarsNumber * sizeof(int));
-  for (int i = 0; i < s->pillarsNumber; i++) {
-    (*pillarEdges)[i] = malloc(nEdge * sizeof(int));
-    (*nPillarEdges)[i] = 0;
-  }
-  *extremityEdges = malloc(2 * sizeof(int *));
-  (*extremityEdges)[0] = malloc(nEdge * sizeof(int));
-  (*extremityEdges)[1] = malloc(nEdge * sizeof(int));
-  *nExtremityEdges = malloc(sizeof(int) * 2);
-  (*nExtremityEdges)[0] = 0;
-  (*nExtremityEdges)[1] = 0;
-
-  for (int i = 0; i < nEdge; i++) {
-    int n1 = edgeNode[2 * i] - 1;
-    int n2 = edgeNode[2 * i + 1] - 1;
-
-    double x1 = xyz[3 * n1];
-    double y1 = xyz[3 * n1 + 1];
-    double x2 = xyz[3 * n2];
-    double y2 = xyz[3 * n2 + 1];
-
-    // Identify pillar edges
-    if (fabs(y1 - minY) < 1 && fabs(y2 - minY) < 1) {
-      for (int j = 0; j < s->pillarsNumber; j++) {
-        double px = get_pillar_x(j, s);
-        if ((x1 >= px && x1 <= px + s->pillarsWidth) ||
-            (x2 >= px && x2 <= px + s->pillarsWidth)) {
-          (*pillarEdges)[j][(*nPillarEdges)[j]] = i;
-          (*nPillarEdges)[j]++;
-          break;
+// New function that only identifies tank edges
+void find_tank_edges(double *xyz, size_t nNode, size_t *edgeNode, size_t nEdge, 
+                     int **tankEdges, int *ntankEdges, MeshSettings *s) {
+    double maxY = -1e12;
+    
+    // Find max Y coordinate
+    for (size_t i = 0; i < nNode; i++) {
+        if (xyz[3 * i + 1] > maxY)
+            maxY = xyz[3 * i + 1];
+    }
+    
+    // Allocate memory for tank edges
+    *tankEdges = malloc(sizeof(int) * nEdge);
+    *ntankEdges = 0;
+    
+    // Identify tank edges
+    for (int i = 0; i < nEdge; i++) {
+        int n1 = edgeNode[2 * i] - 1;
+        int n2 = edgeNode[2 * i + 1] - 1;
+        double x1 = xyz[3 * n1];
+        double y1 = xyz[3 * n1 + 1];
+        double x2 = xyz[3 * n2];
+        double y2 = xyz[3 * n2 + 1];
+        
+        // Identify tank edges
+        if (fabs(y1 - maxY) <= 1e-5) {
+            if ((x1 > s->tankX && x1 < s->tankX+s->tankLength) ||
+                (x2 > s->tankX && x2 < s->tankX+s->tankLength)) {
+                (*tankEdges)[*ntankEdges] = i;
+                (*ntankEdges)++;
+            }
         }
-      }
     }
+}
 
-    // Identify extremity edges
-    if ((fabs(x1 - minX) < 1 && fabs(x2 - minX) < 1)) {
-      if (fabs(y1 - maxY) <= 1e-5 && fabs(y2 - maxY) <= 1e-5) {
-        continue;
-      }
-      (*extremityEdges)[0][(*nExtremityEdges)[0]] = i;
-      (*nExtremityEdges)[0]++;
+// Modified original function that no longer handles tank edges
+void find_pillars_and_extremities(double *xyz, size_t nNode, size_t *edgeNode,
+                                 size_t nEdge, int ***pillarEdges,
+                                 int **nPillarEdges, int ***extremityEdges,
+                                 int **nExtremityEdges, MeshSettings *s) {
+    double minY = 1e12;
+    double maxY = -1e12;
+    double minX = 1e12;
+    double maxX = -1e12;
+    
+    // Find min and max Y coordinates
+    for (size_t i = 0; i < nNode; i++) {
+        if (xyz[3 * i + 1] < minY)
+            minY = xyz[3 * i + 1];
+        if (xyz[3 * i + 1] > maxY)
+            maxY = xyz[3 * i + 1];
     }
-    if ((fabs(x1 - maxX) < 1 && fabs(x2 - maxX) < 1)) {
-      if (fabs(y1 - maxY) <= 1e-5 && fabs(y2 - maxY) <= 1e-5) {
-        continue;
-      }
-      (*extremityEdges)[1][(*nExtremityEdges)[1]] = i;
-      (*nExtremityEdges)[1]++;
+    
+    // Find min and max X coordinates
+    for (size_t i = 0; i < nNode; i++) {
+        if (xyz[3 * i] < minX)
+            minX = xyz[3 * i];
+        if (xyz[3 * i] > maxX)
+            maxX = xyz[3 * i];
     }
-  }
+    
+    // Identify pillar edges and extremity edges
+    *pillarEdges = malloc(s->pillarsNumber * sizeof(int *));
+    *nPillarEdges = malloc(s->pillarsNumber * sizeof(int));
+    for (int i = 0; i < s->pillarsNumber; i++) {
+        (*pillarEdges)[i] = malloc(nEdge * sizeof(int));
+        (*nPillarEdges)[i] = 0;
+    }
+    
+    *extremityEdges = malloc(2 * sizeof(int *));
+    (*extremityEdges)[0] = malloc(nEdge * sizeof(int));
+    (*extremityEdges)[1] = malloc(nEdge * sizeof(int));
+    *nExtremityEdges = malloc(sizeof(int) * 2);
+    (*nExtremityEdges)[0] = 0;
+    (*nExtremityEdges)[1] = 0;
+    
+    for (int i = 0; i < nEdge; i++) {
+        int n1 = edgeNode[2 * i] - 1;
+        int n2 = edgeNode[2 * i + 1] - 1;
+        double x1 = xyz[3 * n1];
+        double y1 = xyz[3 * n1 + 1];
+        double x2 = xyz[3 * n2];
+        double y2 = xyz[3 * n2 + 1];
+        
+        // Identify pillar edges
+        if (fabs(y1 - minY) < 1 && fabs(y2 - minY) < 1) {
+            for (int j = 0; j < s->pillarsNumber; j++) {
+                double px = get_pillar_x(j, s);
+                if ((x1 >= px && x1 <= px + s->pillarsWidth) ||
+                    (x2 >= px && x2 <= px + s->pillarsWidth)) {
+                    (*pillarEdges)[j][(*nPillarEdges)[j]] = i;
+                    (*nPillarEdges)[j]++;
+                    break;
+                }
+            }
+        }
+        
+        // Identify extremity edges
+        if ((fabs(x1 - minX) < 1 && fabs(x2 - minX) < 1)) {
+            if (fabs(y1 - maxY) <= 1e-5 && fabs(y2 - maxY) <= 1e-5) {
+                continue;
+            }
+            (*extremityEdges)[0][(*nExtremityEdges)[0]] = i;
+            (*nExtremityEdges)[0]++;
+        }
+        if ((fabs(x1 - maxX) < 1 && fabs(x2 - maxX) < 1)) {
+            if (fabs(y1 - maxY) <= 1e-5 && fabs(y2 - maxY) <= 1e-5) {
+                continue;
+            }
+            (*extremityEdges)[1][(*nExtremityEdges)[1]] = i;
+            (*nExtremityEdges)[1]++;
+        }
+    }
 }
 
 Mesh *generate_mesh(MeshSettings *s, double *scale) {
@@ -244,9 +283,10 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
   // Analyze geometry to create domains
   int **pillarEdges, **extremityEdges;
   int *nPillarEdges, *nExtremityEdges;
+  int nTankEdges, *tankEdges;
   find_pillars_and_extremities(xyz, nNode, edgeNode, nEdge, &pillarEdges,
                                &nPillarEdges, &extremityEdges, &nExtremityEdges,
-                               global_s);
+                               &nTankEdges, &tankEdges, global_s);
 
   // Getting triangles
   size_t nElem, *elem;
@@ -263,7 +303,7 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
 
   // Write domains to file
   int totalDomains =
-      global_s->pillarsNumber + 2; // Number of pillars + 2 extremities
+      global_s->pillarsNumber + 2 + 1; // Number of pillars + 2 extremities + tank
   fprintf(file, "Number of domains %d\n", totalDomains);
 
   // Write pillar domains
@@ -283,7 +323,7 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
 
   // Write extremity domains
   for (int i = 0; i < 2; i++) {
-    fprintf(file, "  Domain : %6d \n", global_s->pillarsNumber + i);
+    fprintf(file, "  Domain : %6d \n", global_s->pillarsNumber + i + 1);
     fprintf(file, "  Name : Extremity%d\n", i);
     fprintf(file, "  Number of elements : %6u\n", nExtremityEdges[i]);
     for (int j = 0; j < nExtremityEdges[i]; j++) {
@@ -294,6 +334,17 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
     }
     fprintf(file, "\n");
     free(extremityEdges[i]);
+  }
+
+  // Write tank domain
+    fprintf(file, "  Domain : %6d \n", global_s->pillarsNumber + 2 + 1);
+    fprintf(file, "  Name : Tank\n");
+    fprintf(file, "  Number of elements : %6u\n", nTankEdges);
+    for (int j = 0; j < nTankEdges; j++) {
+      fprintf(file, "%6d ", tankEdges[j]);
+      if ((j + 1) % 10 == 0) {
+        fprintf(file, "\n");
+      }
   }
 
   fclose(file);
@@ -322,7 +373,8 @@ Mesh *load_mesh_and_write_to_file(double *scale) {
     }
   }
 
-  log_warn("BEFORE SCALE: %d is (%f,%f,%f)", node[0]-1, mesh->vertexArray[0], mesh->vertexArray[1], mesh->vertexArray[2]);
+  log_warn("BEFORE SCALE: %d is (%f,%f,%f)", node[0] - 1, mesh->vertexArray[0],
+           mesh->vertexArray[1], mesh->vertexArray[2]);
 
   gmshFree(edgeElem);
   gmshFree(edgeNode);

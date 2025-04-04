@@ -165,6 +165,7 @@ int solutiondRead(int allocated_size, double *value, const char *filename);
 void elasticityAssembleElements(problem *theProblem);
 void elasticityAssembleNeumann(problem *theProblem);
 void elasticityAssembleElementsBand(problem *theProblem);
+void elasticityAssembleNeumannExplicit(problem *theProblem, int* edges, int num_edges, double value);
 
 double *fullSystemEliminate(linearSystem *mySystem);
 double *bandSystemEliminate(linearSystem *myBand);

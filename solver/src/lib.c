@@ -5,7 +5,7 @@
 
 void ss_init() { printf("[*] Solver Loaded\n"); }
 
-double *compute_solution(char *filename, problem **prob, geo **geom) {
+double *compute_solution(char *filename, problem **prob, geo **geom, int nTankEdges, int* TankEdges, double tankWeight) {
   geo *theGeometry = geoMeshRead(filename);
   if (geom != NULL)
     *geom = theGeometry;
@@ -58,6 +58,12 @@ double *compute_solution(char *filename, problem **prob, geo **geom) {
 
   elasticityAddBoundaryCondition(theProblem, "Extremity1", DIRICHLET_Y, 0.0);
   elasticityAddBoundaryCondition(theProblem, "Extremity0", DIRICHLET_Y, 0.0);
+
+  elasticityAddBoundaryCondition(theProblem, "Tank", DIRICHLET_X, 0.0);
+  elasticityAddBoundaryCondition(theProblem, "Tank", DIRICHLET_Y, 0.0);
+
+  elasticityAssembleNeumannExplicit(theProblem, TankEdges, nTankEdges, tankWeight);
+
 
   double *theSoluce = elasticitySolve(theProblem, makeBanded);
 

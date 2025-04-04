@@ -7,7 +7,7 @@ int main() {
   problem *theProblem;
   geo *theGeometry;
   double *theSoluce =
-      compute_solution("./data/mesh.txt", &theProblem, &theGeometry);
+      compute_solution("./data/mesh.txt", &theProblem, &theGeometry, 0, NULL, 0);
 
   nodes *theNodes = theGeometry->theNodes;
   double deformationFactor = 1e5;

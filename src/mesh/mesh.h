@@ -37,6 +37,9 @@ typedef struct {
     double precisionRadius;
     double holeX;
     double holeY;
+    double tankLength;
+    double tankWeight;
+    double tankX;
 } MeshSettings;
 
 Mesh* generate_mesh(MeshSettings* s, double* scale);
