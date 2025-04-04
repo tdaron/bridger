@@ -24,7 +24,7 @@ MeshSettings settings = {.bridgeHeight = .8,
                          .preciseElementSize = 0.1,
                          .precisionRadius = 2,
                          .tankLength = 4,
-                         .tankWeight = -100000,
+                         .tankWeight = -90000,
                          .tankX = 0,
                          .holeRadius = 0.40
 
