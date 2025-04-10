@@ -351,7 +351,7 @@ def assemble_csr_system(problem):
     coo_global = coo_global[sort_indices]
     coo_vals = coo_vals[sort_indices]
 
-    col_index, row_index, values = csr_from_coo2(coo_global, coo_vals, nnz, n_points)
+    col_index, row_index, values = csr_from_coo(coo_global, coo_vals, nnz, n_points)
     print(np.count_nonzero(values))
     print(np.count_nonzero(abs(values) > 1e-6))
 
@@ -382,8 +382,7 @@ def assemble_csr_system(problem):
 
 
 
-def csr_from_coo2(coo_adj: NDArray, coo_vals, nnz: int, n_points: int) -> tuple:
-    """Convert COO adjacency list to CSR format"""
+def csr_from_coo(coo_adj: NDArray, coo_vals, nnz: int, n_points: int) -> tuple:
     # Create the CSR matrix
     col_index = np.zeros(nnz, dtype=int)
     row_index = np.zeros(n_points * 2 + 1, dtype=int)
@@ -394,7 +393,7 @@ def csr_from_coo2(coo_adj: NDArray, coo_vals, nnz: int, n_points: int) -> tuple:
     nnz_new = 0
     for i in range(len(coo_adj)):
         # Add values of duplicate entries
-        # to the last entry which is the first
+        # to the previous entry which is the first
         # of the duplicates and was added to the lists.
         # The is because we assume the input coo
         # lists are sorted by column then row.
@@ -418,8 +417,6 @@ def csr_from_coo2(coo_adj: NDArray, coo_vals, nnz: int, n_points: int) -> tuple:
     # Make sure to update the last rows that might be empty
     for j in range(prev_row + 1, len(row_index)):
         row_index[j] = nnz_new
-
-    # print()
 
     # Remove unused elements
     col_index = col_index[:nnz_new]
